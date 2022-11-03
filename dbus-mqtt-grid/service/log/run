@@ -1,0 +1,2 @@
+#!/bin/sh
+exec multilog t s25000 n4 /var/log/dbus-mqtt-grid
