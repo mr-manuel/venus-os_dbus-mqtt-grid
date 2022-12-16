@@ -29,12 +29,6 @@ except:
     logging.error("config.ini file not found. Copy or rename the config.sample.ini to config.ini")
     sys.exit()
 
-
-# MQTT setup
-MQTT_broker_address = config['MQTT']['broker_address']
-MQTT_topic          = config['MQTT']['topic_meters']
-MQTT_client_name    = "MqttGrid"
-
 # set variables
 connected = 0
 
@@ -243,13 +237,36 @@ def main():
     # Have a mainloop, so we can send/receive asynchronous calls to and from dbus
     DBusGMainLoop(set_as_default=True)
 
-    # MQTT configuration
-    client = mqtt.Client(MQTT_client_name) # create new instance
+    # MQTT setup
+    client = mqtt.Client("MqttGrid")
     client.on_disconnect = on_disconnect
     client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(MQTT_broker_address)  # connect to broker
+    client.on_publish = on_publish
 
+    # check tls and use settings, if provided
+    if 'tls_enabled' in config['MQTT'] and config['MQTT']['tls_enabled'] == '1':
+        logging.debug("MQTT client: TLS is enabled")
+
+        if 'tls_path_to_ca' in config['MQTT'] and config['MQTT']['tls_path_to_ca'] != '':
+            logging.debug("MQTT client: TLS: custom ca \"%s\" used" % config['MQTT']['tls_path_to_ca'])
+            client.tls_set(config['MQTT']['tls_path_to_ca'], tls_version=2)
+        else:
+            client.tls_set(tls_version=2)
+
+        if 'tls_insecure' in config['MQTT'] and config['MQTT']['tls_insecure'] != '':
+            logging.debug("MQTT client: TLS certificate server hostname verification disabled")
+            client.tls_insecure_set(True)
+
+    # check if username and password are set
+    if 'username' in config['MQTT'] and 'password' in config['MQTT'] and config['MQTT']['username'] != '' and config['MQTT']['password'] != '':
+        logging.debug("MQTT client: Using username \"%s\" and password to connect" % config['MQTT']['username'])
+        client.username_pw_set(username=config['MQTT']['username'], password=config['MQTT']['password'])
+
+     # connect to broker
+    client.connect(
+        host=config['MQTT']['broker_address'],
+        port=int(config['MQTT']['broker_port'])
+    )
     client.loop_start()
 
     # wait to receive first data, else the JSON is empty and phase setup won't work

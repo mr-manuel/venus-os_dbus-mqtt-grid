@@ -136,7 +136,7 @@ Run `/data/etc/dbus-mqtt-grid/restart.sh`
 
 ### Debugging
 
-The logs can be checked with `tail -n 100 -f /data/log/dbus-mqtt-grid/current`
+The logs can be checked with `tail -n 100 -f /data/log/dbus-mqtt-grid/current | tai64nlocal`
 
 The service status can be checked with svstat `svstat /service/dbus-mqtt-grid`
 
