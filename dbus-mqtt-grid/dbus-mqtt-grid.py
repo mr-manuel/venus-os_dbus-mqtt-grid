@@ -68,7 +68,7 @@ def on_disconnect(client, userdata, rc):
 
     try:
         logging.info("MQTT client: Trying to reconnect")
-        client.connect(MQTT_broker_address)
+        client.connect(config['MQTT']['broker_address'])
         connected = 1
     except Exception as e:
         logging.error("MQTT client: Error in retrying to connect with broker: %s" % e)
@@ -79,7 +79,7 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         logging.info("MQTT client: Connected to MQTT broker!")
         connected = 1
-        client.subscribe(MQTT_topic)
+        client.subscribe(config['MQTT']['topic_meters'])
     else:
         logging.error("MQTT client: Failed to connect, return code %d\n", rc)
 
@@ -88,7 +88,7 @@ def on_message(client, userdata, msg):
 
         global grid_power, grid_current, grid_voltage, grid_forward, grid_reverse, grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_forward, grid_L1_reverse, grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_forward, grid_L2_reverse, grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_forward, grid_L3_reverse
         # get JSON from topic
-        if msg.topic == MQTT_topic:
+        if msg.topic == config['MQTT']['topic_meters']:
             if msg.payload != '{"value": null}' and msg.payload != b'{"value": null}':
                 jsonpayload = json.loads(msg.payload)
                 grid_power   = float(jsonpayload['grid']['power'])
@@ -154,15 +154,14 @@ class DbusMqttGridService:
         # Create the mandatory objects
         self._dbusservice.add_path('/DeviceInstance', deviceinstance)
         self._dbusservice.add_path('/ProductId', 0xFFFF) # value used in ac_sensor_bridge.cpp of dbus-cgwacs
+        self._dbusservice.add_path('/Serial', 30000) # value used in ac_sensor_bridge.cpp of dbus-cgwacs
         self._dbusservice.add_path('/ProductName', productname)
         self._dbusservice.add_path('/CustomName', productname)
         self._dbusservice.add_path('/FirmwareVersion', 0.1)
-        self._dbusservice.add_path('/HardwareVersion', 0)
+        self._dbusservice.add_path('/HardwareVersion', 0.1)
         self._dbusservice.add_path('/Connected', 1)
 
         self._dbusservice.add_path('/Latency', None)
-        #self._dbusservice.add_path('/Position', 0) # normaly only needed for pvinverter
-        self._dbusservice.add_path('/StatusCode', 0)  # Dummy path so VRM detects us as a PV-inverter.
 
         for path, settings in self._paths.items():
             self._dbusservice.add_path(
@@ -176,37 +175,35 @@ class DbusMqttGridService:
         self._dbusservice['/Ac/Power'] =  round(grid_power, 2) # positive: consumption, negative: feed into grid
         self._dbusservice['/Ac/Current'] = round(grid_current, 2)
         self._dbusservice['/Ac/Voltage'] = round(grid_voltage, 2)
-        self._dbusservice['/Ac/Energy/Forward'] = round(grid_forward/1000, 2)
-        self._dbusservice['/Ac/Energy/Reverse'] = round(grid_forward/1000, 2)
+        self._dbusservice['/Ac/Energy/Forward'] = round(grid_forward, 2)
+        self._dbusservice['/Ac/Energy/Reverse'] = round(grid_reverse, 2)
 
         if grid_L1_power != None:
             self._dbusservice['/Ac/L1/Power'] = round(grid_L1_power, 2)
             self._dbusservice['/Ac/L1/Current'] = round(grid_L1_current, 2)
             self._dbusservice['/Ac/L1/Voltage'] = round(grid_L1_voltage, 2)
-            self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_L1_forward/1000, 2)
-            self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_L1_forward/1000, 2)
+            self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_L1_forward, 2)
+            self._dbusservice['/Ac/L1/Energy/Reverse'] = round(grid_L1_reverse, 2)
         else:
             self._dbusservice['/Ac/L1/Power'] = round(grid_power, 2)
             self._dbusservice['/Ac/L1/Current'] = round(grid_current, 2)
             self._dbusservice['/Ac/L1/Voltage'] = round(grid_voltage, 2)
-            self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_forward/1000, 2)
-            self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_forward/1000, 2)
-
-        #self._dbusservice['/StatusCode'] = 7
+            self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_forward, 2)
+            self._dbusservice['/Ac/L1/Energy/Reverse'] = round(grid_reverse, 2)
 
         if grid_L2_power != None:
             self._dbusservice['/Ac/L2/Power'] = round(grid_L2_power, 2)
             self._dbusservice['/Ac/L2/Current'] = round(grid_L2_current, 2)
             self._dbusservice['/Ac/L2/Voltage'] = round(grid_L2_voltage, 2)
-            self._dbusservice['/Ac/L2/Energy/Forward'] = round(grid_L2_forward/1000, 2)
-            self._dbusservice['/Ac/L2/Energy/Forward'] = round(grid_L2_forward/1000, 2)
+            self._dbusservice['/Ac/L2/Energy/Forward'] = round(grid_L2_forward, 2)
+            self._dbusservice['/Ac/L2/Energy/Reverse'] = round(grid_L2_reverse, 2)
 
         if grid_L3_power != None:
             self._dbusservice['/Ac/L3/Power'] = round(grid_L3_power, 2)
             self._dbusservice['/Ac/L3/Current'] = round(grid_L3_current, 2)
             self._dbusservice['/Ac/L3/Voltage'] = round(grid_L3_voltage, 2)
-            self._dbusservice['/Ac/L3/Energy/Forward'] = round(grid_L3_forward/1000, 2)
-            self._dbusservice['/Ac/L3/Energy/Forward'] = round(grid_L3_forward/1000, 2)
+            self._dbusservice['/Ac/L3/Energy/Forward'] = round(grid_L3_forward, 2)
+            self._dbusservice['/Ac/L3/Energy/Reverse'] = round(grid_L3_reverse, 2)
 
         logging.info("Grid: {:.1f} W - {:.1f} V - {:.1f} A".format(grid_power, grid_voltage, grid_current))
         if grid_L1_power:
@@ -241,7 +238,7 @@ def main():
     client = mqtt.Client("MqttGrid")
     client.on_disconnect = on_disconnect
     client.on_connect = on_connect
-    client.on_publish = on_publish
+    client.on_message = on_message
 
     # check tls and use settings, if provided
     if 'tls_enabled' in config['MQTT'] and config['MQTT']['tls_enabled'] == '1':
@@ -294,7 +291,6 @@ def main():
         '/Ac/L1/Energy/Forward': {'initial': None, 'textformat': _kwh},
         '/Ac/L1/Energy/Reverse': {'initial': None, 'textformat': _kwh},
 
-        '/Ac/StatusCode': {'initial': 0, 'textformat': _n},
         '/UpdateIndex': {'initial': 0, 'textformat': _n},
     }
 
