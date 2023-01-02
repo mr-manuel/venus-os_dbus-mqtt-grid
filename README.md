@@ -9,7 +9,7 @@ I wrote this script for myself. I'm not responsible, if you damage something usi
 
 ### Purpose
 
-The script emulates a physical Grid Meter in Venus OS. It gets the MQTT data from a subscribed topic and publishes the information on the dbus as the service `com.victronenergy.grid.mqtt_grid` with the VRM instance `30`.
+The script emulates a physical Grid Meter in Venus OS. It gets the MQTT data from a subscribed topic and publishes the information on the dbus as the service `com.victronenergy.grid.mqtt_grid` with the VRM instance `31`.
 
 
 ### Config
@@ -144,7 +144,7 @@ This will output somethink like `/service/dbus-mqtt-grid: up (pid 5845) 185 seco
 
 If the seconds are under 5 then the service crashes and gets restarted all the time. If you do not see anything in the logs you can increase the log level in `/data/etc/dbus-mqtt-grid/dbus-mqtt-grid.py` by changing `level=logging.WARNING` to `level=logging.INFO` or `level=logging.DEBUG`
 
-If the script stops with the message `dbus.exceptions.NameExistsException: Bus name already exists: com.victronenergy.pvinverter.enphase_envoy"` it means that the service is still running or another service is using that bus name.
+If the script stops with the message `dbus.exceptions.NameExistsException: Bus name already exists: com.victronenergy.grid.mqtt_grid"` it means that the service is still running or another service is using that bus name.
 
 ### Compatibility
 

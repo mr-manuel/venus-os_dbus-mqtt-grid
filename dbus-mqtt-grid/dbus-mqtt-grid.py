@@ -153,12 +153,11 @@ class DbusMqttGridService:
 
         # Create the mandatory objects
         self._dbusservice.add_path('/DeviceInstance', deviceinstance)
-        self._dbusservice.add_path('/ProductId', 0xFFFF) # value used in ac_sensor_bridge.cpp of dbus-cgwacs
-        self._dbusservice.add_path('/Serial', 30000) # value used in ac_sensor_bridge.cpp of dbus-cgwacs
+        self._dbusservice.add_path('/ProductId', 0xFFFF)
         self._dbusservice.add_path('/ProductName', productname)
         self._dbusservice.add_path('/CustomName', productname)
-        self._dbusservice.add_path('/FirmwareVersion', 0.1)
-        self._dbusservice.add_path('/HardwareVersion', 0.1)
+        self._dbusservice.add_path('/FirmwareVersion', '0.0.1')
+        self._dbusservice.add_path('/HardwareVersion', '0.0.1')
         self._dbusservice.add_path('/Connected', 1)
 
         self._dbusservice.add_path('/Latency', None)
@@ -234,6 +233,7 @@ def main():
     # Have a mainloop, so we can send/receive asynchronous calls to and from dbus
     DBusGMainLoop(set_as_default=True)
 
+
     # MQTT setup
     client = mqtt.Client("MqttGrid")
     client.on_disconnect = on_disconnect
@@ -270,6 +270,7 @@ def main():
     while grid_power == 0:
         logging.info("Waiting 5 seconds for receiving first data...")
         time.sleep(5)
+
 
     #formatting
     _kwh = lambda p, v: (str(round(v, 2)) + 'kWh')
@@ -315,7 +316,7 @@ def main():
 
     pvac_output = DbusMqttGridService(
         servicename='com.victronenergy.grid.mqtt_grid',
-        deviceinstance=30,
+        deviceinstance=31,
         paths=paths_dbus
         )
 
