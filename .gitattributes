@@ -1,0 +1,16 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+text eol=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.ini   text
+*.md    text
+*.py    text
+*.sh    text
+run     text
+
+# Denote all files that are truly binary and should not be modified.
+*.gif   binary
+*.jpg   binary
+*.png   binary
+*.zip   binary
