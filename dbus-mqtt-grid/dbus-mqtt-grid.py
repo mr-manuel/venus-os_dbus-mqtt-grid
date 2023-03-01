@@ -32,7 +32,7 @@ except:
 # set variables
 connected = 0
 
-grid_power = 0
+grid_power = -1
 grid_current = 0
 grid_voltage = 0
 grid_forward = 0
@@ -86,7 +86,11 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
 
-        global grid_power, grid_current, grid_voltage, grid_forward, grid_reverse, grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_forward, grid_L1_reverse, grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_forward, grid_L2_reverse, grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_forward, grid_L3_reverse
+        global \
+            grid_power, grid_current, grid_voltage, grid_forward, grid_reverse, \
+            grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_forward, grid_L1_reverse, \
+            grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_forward, grid_L2_reverse, \
+            grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_forward, grid_L3_reverse
         # get JSON from topic
         if msg.topic == config['MQTT']['topic_meters']:
             if msg.payload != '{"value": null}' and msg.payload != b'{"value": null}':
@@ -267,9 +271,14 @@ def main():
     client.loop_start()
 
     # wait to receive first data, else the JSON is empty and phase setup won't work
-    while grid_power == 0:
-        logging.info("Waiting 5 seconds for receiving first data...")
+    i = 0
+    while grid_power == -1:
+        if i % 12 != 0 or i == 0:
+            logging.info("Waiting 5 seconds for receiving first data...")
+        else:
+            logging.warning("Waiting since %s seconds for receiving first data..." % str(i * 5))
         time.sleep(5)
+        i += 1
 
 
     #formatting
