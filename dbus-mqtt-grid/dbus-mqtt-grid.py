@@ -98,7 +98,7 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         logging.info("MQTT client: Connected to MQTT broker!")
         connected = 1
-        client.subscribe(config['MQTT']['topic_meters'])
+        client.subscribe(config['MQTT']['topic'])
     else:
         logging.error("MQTT client: Failed to connect, return code %d\n", rc)
 
@@ -112,7 +112,7 @@ def on_message(client, userdata, msg):
             grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_forward, grid_L3_reverse
 
         # get JSON from topic
-        if msg.topic == config['MQTT']['topic_meters']:
+        if msg.topic == config['MQTT']['topic']:
             if msg.payload != '' and msg.payload != b'':
                 jsonpayload = json.loads(msg.payload)
 
@@ -175,6 +175,7 @@ class DbusMqttGridService:
         deviceinstance,
         paths,
         productname='MQTT Grid',
+        customname='MQTT Grid',
         connection='MQTT Grid service'
     ):
 
@@ -192,8 +193,8 @@ class DbusMqttGridService:
         self._dbusservice.add_path('/DeviceInstance', deviceinstance)
         self._dbusservice.add_path('/ProductId', 0xFFFF)
         self._dbusservice.add_path('/ProductName', productname)
-        self._dbusservice.add_path('/CustomName', productname)
-        self._dbusservice.add_path('/FirmwareVersion', '0.0.2')
+        self._dbusservice.add_path('/CustomName', customname)
+        self._dbusservice.add_path('/FirmwareVersion', '0.1.0')
         #self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path('/Connected', 1)
 
@@ -272,7 +273,7 @@ def main():
 
 
     # MQTT setup
-    client = mqtt.Client("MqttGrid")
+    client = mqtt.Client("MqttGrid_" + str(config['MQTT']['device_instance']))
     client.on_disconnect = on_disconnect
     client.on_connect = on_connect
     client.on_message = on_message
@@ -357,8 +358,9 @@ def main():
 
 
     pvac_output = DbusMqttGridService(
-        servicename='com.victronenergy.grid.mqtt_grid',
-        deviceinstance=31,
+        servicename='com.victronenergy.grid.mqtt_grid_' + str(config['MQTT']['device_instance']),
+        deviceinstance=int(config['MQTT']['device_instance']),
+        customname=config['MQTT']['device_name'],
         paths=paths_dbus
         )
 
