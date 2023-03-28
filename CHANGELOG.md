@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.1
+* Added: Timeout in order to disconnect the battery, if no new MQTT message is received after x seconds (configurable in `config.ini`)
+
 ## v0.1.0
 * Added: Device name can be changed in the `config.ini`
 * Added: Device instance can be changed in the `config.ini`
