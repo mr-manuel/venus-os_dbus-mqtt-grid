@@ -403,7 +403,7 @@ def main():
             '/Ac/L3/Power': {'initial': 0, 'textformat': _w},
             '/Ac/L3/Current': {'initial': 0, 'textformat': _a},
             '/Ac/L3/Voltage': {'initial': 0, 'textformat': _v},
-            '/Ac/L2/Frequency': {'initial': None, 'textformat': _hz},
+            '/Ac/L3/Frequency': {'initial': None, 'textformat': _hz},
             '/Ac/L3/Energy/Forward': {'initial': None, 'textformat': _kwh},
             '/Ac/L3/Energy/Reverse': {'initial': None, 'textformat': _kwh},
         })
