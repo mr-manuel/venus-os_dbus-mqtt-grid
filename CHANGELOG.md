@@ -2,6 +2,7 @@
 
 ## v0.1.3
 * Changed: Fix crash when rounding none value
+* Changed: Fixed a typo
 
 ## v0.1.2
 * Added: Frequency
