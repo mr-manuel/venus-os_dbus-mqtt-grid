@@ -227,7 +227,7 @@ class DbusMqttGridService:
         self._dbusservice.add_path('/ProductId', 0xFFFF)
         self._dbusservice.add_path('/ProductName', productname)
         self._dbusservice.add_path('/CustomName', customname)
-        self._dbusservice.add_path('/FirmwareVersion', '0.1.2 (20230518)')
+        self._dbusservice.add_path('/FirmwareVersion', '0.1.3 (20230522)')
         # self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path('/Connected', 1)
 
@@ -249,42 +249,42 @@ class DbusMqttGridService:
 
         if last_changed != last_updated:
 
-            self._dbusservice['/Ac/Power'] = round(grid_power, 2)  # positive: consumption, negative: feed into grid
-            self._dbusservice['/Ac/Current'] = round(grid_current, 2)
-            self._dbusservice['/Ac/Voltage'] = round(grid_voltage, 2)
-            self._dbusservice['/Ac/Energy/Forward'] = round(grid_forward, 2)
-            self._dbusservice['/Ac/Energy/Reverse'] = round(grid_reverse, 2)
+            self._dbusservice['/Ac/Power'] = round(grid_power, 2) if grid_power is not None else None  # positive: consumption, negative: feed into grid
+            self._dbusservice['/Ac/Current'] = round(grid_current, 2) if grid_current is not None else None
+            self._dbusservice['/Ac/Voltage'] = round(grid_voltage, 2) if grid_voltage is not None else None
+            self._dbusservice['/Ac/Energy/Forward'] = round(grid_forward, 2) if grid_forward is not None else None
+            self._dbusservice['/Ac/Energy/Reverse'] = round(grid_reverse, 2) if grid_reverse is not None else None
 
             if grid_L1_power is not None:
-                self._dbusservice['/Ac/L1/Power'] = round(grid_L1_power, 2)
-                self._dbusservice['/Ac/L1/Current'] = round(grid_L1_current, 2)
-                self._dbusservice['/Ac/L1/Voltage'] = round(grid_L1_voltage, 2)
-                self._dbusservice['/Ac/L1/Frequency'] = round(grid_L1_frequency, 2)
-                self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_L1_forward, 2)
-                self._dbusservice['/Ac/L1/Energy/Reverse'] = round(grid_L1_reverse, 2)
+                self._dbusservice['/Ac/L1/Power'] = round(grid_L1_power, 2) if grid_L1_power is not None else None
+                self._dbusservice['/Ac/L1/Current'] = round(grid_L1_current, 2) if grid_L1_current is not None else None
+                self._dbusservice['/Ac/L1/Voltage'] = round(grid_L1_voltage, 2) if grid_L1_voltage is not None else None
+                self._dbusservice['/Ac/L1/Frequency'] = round(grid_L1_frequency, 2) if grid_L1_frequency is not None else None
+                self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_L1_forward, 2) if grid_L1_forward is not None else None
+                self._dbusservice['/Ac/L1/Energy/Reverse'] = round(grid_L1_reverse, 2) if grid_L1_reverse is not None else None
             else:
-                self._dbusservice['/Ac/L1/Power'] = round(grid_power, 2)
-                self._dbusservice['/Ac/L1/Current'] = round(grid_current, 2)
-                self._dbusservice['/Ac/L1/Voltage'] = round(grid_voltage, 2)
+                self._dbusservice['/Ac/L1/Power'] = round(grid_power, 2) if grid_power is not None else None
+                self._dbusservice['/Ac/L1/Current'] = round(grid_current, 2) if grid_current is not None else None
+                self._dbusservice['/Ac/L1/Voltage'] = round(grid_voltage, 2) if grid_voltage is not None else None
                 self._dbusservice['/Ac/L1/Frequency'] = None
-                self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_forward, 2)
-                self._dbusservice['/Ac/L1/Energy/Reverse'] = round(grid_reverse, 2)
+                self._dbusservice['/Ac/L1/Energy/Forward'] = round(grid_forward, 2) if grid_forward is not None else None
+                self._dbusservice['/Ac/L1/Energy/Reverse'] = round(grid_reverse, 2) if grid_reverse is not None else None
 
             if grid_L2_power is not None:
-                self._dbusservice['/Ac/L2/Power'] = round(grid_L2_power, 2)
-                self._dbusservice['/Ac/L2/Current'] = round(grid_L2_current, 2)
-                self._dbusservice['/Ac/L2/Voltage'] = round(grid_L2_voltage, 2)
-                self._dbusservice['/Ac/L2/Frequency'] = round(grid_L2_frequency, 2)
-                self._dbusservice['/Ac/L2/Energy/Forward'] = round(grid_L2_forward, 2)
-                self._dbusservice['/Ac/L2/Energy/Reverse'] = round(grid_L2_reverse, 2)
+                self._dbusservice['/Ac/L2/Power'] = round(grid_L2_power, 2) if grid_L2_power is not None else None
+                self._dbusservice['/Ac/L2/Current'] = round(grid_L2_current, 2) if grid_L2_current is not None else None
+                self._dbusservice['/Ac/L2/Voltage'] = round(grid_L2_voltage, 2) if grid_L2_voltage is not None else None
+                self._dbusservice['/Ac/L2/Frequency'] = round(grid_L2_frequency, 2) if grid_L2_frequency is not None else None
+                self._dbusservice['/Ac/L2/Energy/Forward'] = round(grid_L2_forward, 2) if grid_L2_forward is not None else None
+                self._dbusservice['/Ac/L2/Energy/Reverse'] = round(grid_L2_reverse, 2) if grid_L2_reverse is not None else None
 
             if grid_L3_power is not None:
-                self._dbusservice['/Ac/L3/Power'] = round(grid_L3_power, 2)
-                self._dbusservice['/Ac/L3/Current'] = round(grid_L3_current, 2)
-                self._dbusservice['/Ac/L3/Voltage'] = round(grid_L3_voltage, 2)
-                self._dbusservice['/Ac/L3/Frequency'] = round(grid_L3_frequency, 2)
-                self._dbusservice['/Ac/L3/Energy/Forward'] = round(grid_L3_forward, 2)
-                self._dbusservice['/Ac/L3/Energy/Reverse'] = round(grid_L3_reverse, 2)
+                self._dbusservice['/Ac/L3/Power'] = round(grid_L3_power, 2) if grid_L3_power is not None else None
+                self._dbusservice['/Ac/L3/Current'] = round(grid_L3_current, 2) if grid_L3_current is not None else None
+                self._dbusservice['/Ac/L3/Voltage'] = round(grid_L3_voltage, 2) if grid_L3_voltage is not None else None
+                self._dbusservice['/Ac/L3/Frequency'] = round(grid_L3_frequency, 2) if grid_L3_frequency is not None else None
+                self._dbusservice['/Ac/L3/Energy/Forward'] = round(grid_L3_forward, 2) if grid_L3_forward is not None else None
+                self._dbusservice['/Ac/L3/Energy/Reverse'] = round(grid_L3_reverse, 2) if grid_L3_reverse is not None else None
 
             logging.debug("Grid: {:.1f} W - {:.1f} V - {:.1f} A".format(grid_power, grid_voltage, grid_current))
             if grid_L1_power:
