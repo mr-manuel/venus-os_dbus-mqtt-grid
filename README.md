@@ -95,6 +95,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
             "power": 0.0,
             "voltage": 0.0,
             "current": 0.0,
+            "frequency": 0.0000,
             "energy_forward": 0.0,
             "energy_reverse": 0.0,
         },
@@ -102,6 +103,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
             "power": 0.0,
             "voltage": 0.0,
             "current": 0.0,
+            "frequency": 0.0000,
             "energy_forward": 0.0,
             "energy_reverse": 0.0,
         },
@@ -109,6 +111,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
             "power": 0.0,
             "voltage": 0.0,
             "current": 0.0,
+            "frequency": 0.0000,
             "energy_forward": 0.0,
             "energy_reverse": 0.0,
         }
@@ -136,7 +139,7 @@ Run `/data/etc/dbus-mqtt-grid/restart.sh`
 
 ### Debugging
 
-The logs can be checked with `tail -n 100 -f /data/log/dbus-mqtt-grid/current | tai64nlocal`
+The logs can be checked with `tail -n 100 -F /data/log/dbus-mqtt-grid/current | tai64nlocal`
 
 The service status can be checked with svstat `svstat /service/dbus-mqtt-grid`
 
