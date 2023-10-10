@@ -299,7 +299,7 @@ def on_message(client, userdata, msg):
                             "power_L3" in jsonpayload["grid"]
                         ):
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
-                            grid_L3_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
+                            grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L3_frequency = None
                             grid_L3_forward = 0
