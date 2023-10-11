@@ -309,7 +309,7 @@ class DbusMqttGridService:
         paths,
         productname="MQTT Grid",
         customname="MQTT Grid",
-        connection="MQTT Grid service",
+        connection="VE.Bus",
     ):
         self._dbusservice = VeDbusService(servicename)
         self._paths = paths
