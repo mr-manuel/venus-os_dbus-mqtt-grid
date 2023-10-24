@@ -11,10 +11,24 @@ I wrote this script for myself. I'm not responsible, if you damage something usi
 
 The script emulates a physical Grid Meter in Venus OS. It gets the MQTT data from a subscribed topic and publishes the information on the dbus as the service `com.victronenergy.grid.mqtt_grid` with the VRM instance `31`.
 
+It also supports the Tasmota-SmartMeter format.
+
 
 ### Config
 
 Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` folder and change it as you need it.
+
+
+#### Tasmota
+
+In order to get it working with the Tasmota-SmartMeter the script on it has to be configured accordingly, e.g.:
+
+```
+1,77070100100700ff@1,Current Consumption,W,power,16
+1,77070100240700ff@1,Current Consumption P1,W,power_L1,16
+1,77070100380700ff@1,Current Consumption P2,W,power_L2,16
+1,770701004c0700ff@1,Current Consumption P3,W,power_L3,16
+```
 
 
 ### JSON structure

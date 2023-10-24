@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.4
+* Added: Tasmota support with https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/pull/8 by @randomname32
+
 ## v0.1.3
 * Changed: Fix crash when rounding none value
 * Changed: Fixed a typo
