@@ -25,19 +25,6 @@ It also supports the Tasmota-SmartMeter format.
 
 Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` folder and change it as you need it.
 
-
-#### Tasmota
-
-In order to get it working with the Tasmota-SmartMeter the script on it has to be configured accordingly, e.g.:
-
-```
-1,77070100100700ff@1,Current Consumption,W,power,16
-1,77070100240700ff@1,Current Consumption P1,W,power_L1,16
-1,77070100380700ff@1,Current Consumption P2,W,power_L2,16
-1,770701004c0700ff@1,Current Consumption P3,W,power_L3,16
-```
-
-
 ### JSON structure
 
 <details><summary>Minimum required</summary>
@@ -140,6 +127,35 @@ In order to get it working with the Tasmota-SmartMeter the script on it has to b
 }
 ```
 </details>
+
+Alternatively you can use the json structure produced by Tasmota-EnergyMeter (see section [tasmota](#Tasmota))
+
+#### Tasmota
+
+Setting up tasmota as Tasmota-SmartMeter is not part of this documentation. See https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics 
+or https://homeitems.de/smartmeter-mit-tasmota-auslesen/# (German) for detailed information on how to set up Tasmota-EnergyMeter.
+
+In order to get dbus-mqtt-grid working with the Tasmota-SmartMeter, the script on tasmota has to be configured in a specific way, e.g.:
+
+```
+1,77070100100700ff@1,Current Consumption,W,power,16
+1,77070100240700ff@1,Current Consumption P1,W,power_L1,16
+1,77070100380700ff@1,Current Consumption P2,W,power_L2,16
+1,770701004c0700ff@1,Current Consumption P3,W,power_L3,16
+```
+
+Important are the 2 last parts of each line.
+- The last number (`16`) lets tasmota transmit this reading via mqtt immediately.
+- The second last entry needs to be named exactly like this: L1: `power_L1`, L2: `power_L2`, L3: `power_L3`, total grid power: `power`
+
+The MQTT messages sent from tasmota should then look like this:
+```
+21:57:13.103 RSL: SENSOR = {"Time":"2023-11-22T21:57:13","grid":{"power":413}}
+21:57:13.124 RSL: SENSOR = {"Time":"2023-11-22T21:57:13","grid":{"power_L1":94}}
+```
+
+It is possible to directly use the ip address of your venusOS installation as MQTT host in tasmota.
+For this to work, set the MQTT part of `config.ini` to `localhost` and enable the MQTT server on your venusOS: https://github.com/victronenergy/dbus-mqtt#set-up
 
 
 ### Install
