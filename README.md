@@ -132,7 +132,7 @@ Alternatively you can use the json structure produced by Tasmota-EnergyMeter (se
 
 #### Tasmota
 
-Setting up tasmota as Tasmota-SmartMeter is not part of this documentation. See https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics 
+Setting up tasmota as Tasmota-SmartMeter is not part of this documentation. See https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics
 or https://homeitems.de/smartmeter-mit-tasmota-auslesen/# (German) for detailed information on how to set up Tasmota-EnergyMeter.
 
 In order to get dbus-mqtt-grid working with the Tasmota-SmartMeter, the script on tasmota has to be configured in a specific way, e.g.:
@@ -160,9 +160,47 @@ For this to work, set the MQTT part of `config.ini` to `localhost` and enable th
 
 ### Install
 
-1. Copy the `dbus-mqtt-grid` folder to `/data/etc` on your Venus OS device
+1. Login to your Venus OS device via SSH. See [Venus OS:Root Access](https://www.victronenergy.com/live/ccgx:root_access#root_access) for more details.
 
-2. Run `bash /data/etc/dbus-mqtt-grid/install.sh` as root
+2. Execute this commands to download and extract the files:
+
+    ```bash
+    # change to temp folder
+    cd /tmp
+
+    # download driver
+    wget -O /tmp/venus-os_dbus-mqtt-grid.zip https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/archive/refs/heads/master.zip
+
+    # If updating: cleanup old folder
+    rm -rf /tmp/venus-os_dbus-mqtt-grid-master
+
+    # unzip folder
+    unzip venus-os_dbus-mqtt-grid.zip
+
+    # If updating: backup existing config file
+    mv /data/etc/dbus-mqtt-grid/config.ini /data/etc/dbus-mqtt-grid_config.ini
+
+    # If updating: cleanup existing driver
+    rm -rf /data/etc/dbus-mqtt-grid
+
+    # copy files
+    cp -R /tmp/venus-os_dbus-mqtt-grid-master/dbus-mqtt-grid/ /data/etc/
+
+    # If updating: restore existing config file
+    mv /data/etc/dbus-mqtt-grid_config.ini /data/etc/dbus-mqtt-grid/config.ini
+    ```
+
+3. Copy the sample config file, if you are installing the driver for the first time and edit it to your needs.
+
+    ```bash
+    # copy default config file
+    cp /data/etc/dbus-mqtt-grid/config.sample.ini /data/etc/dbus-mqtt-grid/config.ini
+
+    # edit the config file with nano
+    nano /data/etc/dbus-mqtt-grid/config.ini
+    ```
+
+4. Run `bash /data/etc/dbus-mqtt-grid/install.sh` to install the driver as service.
 
    The daemon-tools should start this service automatically within seconds.
 
