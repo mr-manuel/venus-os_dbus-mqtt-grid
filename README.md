@@ -157,6 +157,11 @@ The MQTT messages sent from tasmota should then look like this:
 It is possible to directly use the ip address of your venusOS installation as MQTT host in tasmota.
 For this to work, set the MQTT part of `config.ini` to `localhost` and enable the MQTT server on your venusOS: https://github.com/victronenergy/dbus-mqtt#set-up
 
+Additional information can be found in this [issue](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/13#issue-2045377392).
+
+#### Home Assistant
+
+See this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/10#issuecomment-1826763558).
 
 ### Install
 
