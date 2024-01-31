@@ -277,7 +277,7 @@ def on_message(client, userdata, msg):
                                     else 0
                                 )
                         # for Tasmota support
-                        # the power and power_L1-3 values have to be send within the same second or
+                        # the power and power_L1-3 values have to be sent within the same second or
                         # power as last one, else on startup the phases are not correctly recognized
                         elif "power_L1" in jsonpayload["grid"]:
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
