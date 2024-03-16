@@ -177,12 +177,12 @@ def on_message(client, userdata, msg):
                             grid_forward = (
                                 float(jsonpayload["grid"]["energy_forward"])
                                 if "energy_forward" in jsonpayload["grid"]
-                                else 0
+                                else None
                             )
                             grid_reverse = (
                                 float(jsonpayload["grid"]["energy_reverse"])
                                 if "energy_reverse" in jsonpayload["grid"]
-                                else 0
+                                else None
                             )
 
                             # check if L1 and L1 -> power exists
@@ -295,7 +295,7 @@ def on_message(client, userdata, msg):
                                     else 0
                                 )
                         # for Tasmota support
-                        # the power and power_L1-3 values have to be send within the same second or
+                        # the power and power_L1-3 values have to be sent within the same second or
                         # power as last one, else on startup the phases are not correctly recognized
                         elif "power_L1" in jsonpayload["grid"]:
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
@@ -416,12 +416,14 @@ class DbusMqttGridService:
                 self._dbusservice["/Ac/Voltage"] = (
                     round(grid_voltage, 2) if grid_voltage is not None else None
                 )
-                self._dbusservice["/Ac/Energy/Forward"] = (
-                    round(grid_forward, 2) if grid_forward is not None else None
-                )
-                self._dbusservice["/Ac/Energy/Reverse"] = (
-                    round(grid_reverse, 2) if grid_reverse is not None else None
-                )
+                if grid_forward is not None:
+                    self._dbusservice["/Ac/Energy/Forward"] = (
+                        round(grid_forward, 2)
+                    )
+                if grid_reverse is not None:
+                    self._dbusservice["/Ac/Energy/Reverse"] = (
+                        round(grid_reverse, 2)
+                    )
 
                 if grid_L1_power is not None:
                     self._dbusservice["/Ac/L1/Power"] = (

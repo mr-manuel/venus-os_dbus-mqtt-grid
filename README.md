@@ -135,8 +135,19 @@ Alternatively you can use the json structure produced by Tasmota-EnergyMeter (se
 Setting up tasmota as Tasmota-SmartMeter is not part of this documentation. See https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics
 or https://homeitems.de/smartmeter-mit-tasmota-auslesen/# (German) for detailed information on how to set up Tasmota-EnergyMeter.
 
-In order to get dbus-mqtt-grid working with the Tasmota-SmartMeter, the script on tasmota has to be configured in a specific way, e.g.:
+In order to get dbus-mqtt-grid working with the Tasmota-SmartMeter, the script on tasmota has to be configured in a specific way.
 
+Depending on your individual Smart Meter, the first part of the script looks like this:
+```
+>D
+>B
+=>sensor53 r
+>M 1
++1,3,s,0,9600,grid
+```
+Important for dbus-mqtt-grid is, that the `<jsonPrefix>` of the [meter definition](https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-definition) is called `grid`.
+
+Following is an example of the [meter metrics](https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics):
 ```
 1,77070100100700ff@1,Current Consumption,W,power,16
 1,77070100240700ff@1,Current Consumption P1,W,power_L1,16
@@ -145,8 +156,8 @@ In order to get dbus-mqtt-grid working with the Tasmota-SmartMeter, the script o
 ```
 
 Important are the 2 last parts of each line.
-- The last number (`16`) lets tasmota transmit this reading via mqtt immediately.
-- The second last entry needs to be named exactly like this: L1: `power_L1`, L2: `power_L2`, L3: `power_L3`, total grid power: `power`
+- The last number (`16`) lets tasmota transmit this reading via mqtt immediately. This is necessary to get updates of the current power consumption as fast as possible.
+- The second last entry needs to be named exactly like this: L1: `power_L1`, L2: `power_L2`, L3: `power_L3`, total grid power: `power`. These are the keywords that are expected by dbus-mqtt-grid.
 
 The MQTT messages sent from tasmota should then look like this:
 ```
@@ -154,8 +165,24 @@ The MQTT messages sent from tasmota should then look like this:
 21:57:13.124 RSL: SENSOR = {"Time":"2023-11-22T21:57:13","grid":{"power_L1":94}}
 ```
 
+Sending the total energy (kWh consumed and delivered) is also possible. 
+Since those values are not changing much, it is sufficient to transmit them only every [TelePeriod](https://tasmota.github.io/docs/Commands/#teleperiod) seconds. 
+<br>Again, the important parts are the last two of each line, where `3` in this case means that you will get a precision of 3 digits (see  [meter metrics/precision](https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics)). 
+```
+1,77070100010800ff@1000,Total Consumed,KWh,energy_forward,3
+1,77070100020800ff@1000,Total Delivered,KWh,energy_reverse,3
+```
+
 It is possible to directly use the ip address of your venusOS installation as MQTT host in tasmota.
 For this to work, set the MQTT part of `config.ini` to `localhost` and enable the MQTT server on your venusOS: https://github.com/victronenergy/dbus-mqtt#set-up
+
+
+The topic in tasmota has to fit together with the config.ini. For example:
+```  
+Tasmota Topic: SML
+Tasmota Full Topic: %topic%/
+config.ini topic = SML/SENSOR
+```
 
 Additional information can be found in this [issue](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/13#issue-2045377392).
 
