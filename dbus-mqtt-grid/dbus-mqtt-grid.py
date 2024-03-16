@@ -160,15 +160,19 @@ def on_message(client, userdata, msg):
                     if isinstance(jsonpayload["grid"], dict):
                         if "power" in jsonpayload["grid"]:
                             grid_power = float(jsonpayload["grid"]["power"])
-                            grid_current = (
-                                float(jsonpayload["grid"]["current"])
-                                if "current" in jsonpayload["grid"]
-                                else grid_power / float(config["DEFAULT"]["voltage"])
-                            )
                             grid_voltage = (
                                 float(jsonpayload["grid"]["voltage"])
                                 if "voltage" in jsonpayload["grid"]
                                 else float(config["DEFAULT"]["voltage"])
+                            )
+                            grid_current = (
+                                float(jsonpayload["grid"]["current"])
+                                if "current" in jsonpayload["grid"]
+                                else (
+                                    grid_power / grid_voltage
+                                    if grid_voltage != 0
+                                    else 0
+                                )
                             )
                             grid_forward = (
                                 float(jsonpayload["grid"]["energy_forward"])
@@ -187,15 +191,20 @@ def on_message(client, userdata, msg):
                                 and "power" in jsonpayload["grid"]["L1"]
                             ):
                                 grid_L1_power = float(jsonpayload["grid"]["L1"]["power"])
-                                grid_L1_current = (
-                                    float(jsonpayload["grid"]["L1"]["current"])
-                                    if "current" in jsonpayload["grid"]["L1"]
-                                    else grid_L1_power / float(config["DEFAULT"]["voltage"])
-                                )
                                 grid_L1_voltage = (
                                     float(jsonpayload["grid"]["L1"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L1"]
                                     else float(config["DEFAULT"]["voltage"])
+                                )
+                                grid_L1_current = (
+                                    float(jsonpayload["grid"]["L1"]["current"])
+                                    if "current" in jsonpayload["grid"]["L1"]
+                                    else (
+                                        grid_L1_power / grid_L1_voltage
+                                        if grid_L1_voltage != 0
+                                        else 0
+
+                                    )
                                 )
                                 grid_L1_frequency = (
                                     float(jsonpayload["grid"]["L1"]["frequency"])
@@ -219,15 +228,19 @@ def on_message(client, userdata, msg):
                                 and "power" in jsonpayload["grid"]["L2"]
                             ):
                                 grid_L2_power = float(jsonpayload["grid"]["L2"]["power"])
-                                grid_L2_current = (
-                                    float(jsonpayload["grid"]["L2"]["current"])
-                                    if "current" in jsonpayload["grid"]["L2"]
-                                    else grid_L2_power / float(config["DEFAULT"]["voltage"])
-                                )
                                 grid_L2_voltage = (
                                     float(jsonpayload["grid"]["L2"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L2"]
                                     else float(config["DEFAULT"]["voltage"])
+                                )
+                                grid_L2_current = (
+                                    float(jsonpayload["grid"]["L2"]["current"])
+                                    if "current" in jsonpayload["grid"]["L2"]
+                                    else (
+                                        grid_L2_power / grid_L2_voltage
+                                        if grid_L2_voltage != 0
+                                        else 0
+                                    )
                                 )
                                 grid_L2_frequency = (
                                     float(jsonpayload["grid"]["L2"]["frequency"])
@@ -251,15 +264,20 @@ def on_message(client, userdata, msg):
                                 and "power" in jsonpayload["grid"]["L3"]
                             ):
                                 grid_L3_power = float(jsonpayload["grid"]["L3"]["power"])
-                                grid_L3_current = (
-                                    float(jsonpayload["grid"]["L3"]["current"])
-                                    if "current" in jsonpayload["grid"]["L3"]
-                                    else grid_L3_power / float(config["DEFAULT"]["voltage"])
-                                )
                                 grid_L3_voltage = (
                                     float(jsonpayload["grid"]["L3"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L3"]
                                     else float(config["DEFAULT"]["voltage"])
+                                )
+                                grid_L3_current = (
+                                    float(jsonpayload["grid"]["L3"]["current"])
+                                    if "current" in jsonpayload["grid"]["L3"]
+                                    else (
+                                        grid_L3_power / grid_L3_voltage
+                                        if grid_L3_voltage != 0
+                                        else 0
+
+                                    )
                                 )
                                 grid_L3_frequency = (
                                     float(jsonpayload["grid"]["L3"]["frequency"])
@@ -281,22 +299,22 @@ def on_message(client, userdata, msg):
                         # power as last one, else on startup the phases are not correctly recognized
                         elif "power_L1" in jsonpayload["grid"]:
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
-                            grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
                             grid_L1_voltage = float(config["DEFAULT"]["voltage"])
+                            grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
                             grid_L1_frequency = None
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
-                            grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
                             grid_L2_voltage = float(config["DEFAULT"]["voltage"])
+                            grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
                             grid_L2_frequency = None
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
-                            grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
+                            grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
                             grid_L3_frequency = None
                             grid_L3_forward = 0
                             grid_L3_reverse = 0
@@ -326,8 +344,13 @@ def on_message(client, userdata, msg):
         logging.error("Received message is not a valid JSON. %s" % e)
         logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
-    except Exception as e:
-        logging.error("Exception occurred: %s" % e)
+    except Exception:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        file = exception_traceback.tb_frame.f_code.co_filename
+        line = exception_traceback.tb_lineno
+        print(
+            f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
+        )
         logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
 

@@ -2,7 +2,7 @@
 
 ## v0.1.5 (not releaded yet)
 * Added: Error handling
-
+* Changed: Handling when voltage=0 is provided and no current
 
 ## v0.1.4
 * Added: Tasmota support with https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/pull/8 by @randomname32
