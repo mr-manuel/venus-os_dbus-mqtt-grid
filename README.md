@@ -165,9 +165,9 @@ The MQTT messages sent from tasmota should then look like this:
 21:57:13.124 RSL: SENSOR = {"Time":"2023-11-22T21:57:13","grid":{"power_L1":94}}
 ```
 
-Sending the total energy (kWh consumed and delivered) is also possible. 
-Since those values are not changing much, it is sufficient to transmit them only every [TelePeriod](https://tasmota.github.io/docs/Commands/#teleperiod) seconds. 
-<br>Again, the important parts are the last two of each line, where `3` in this case means that you will get a precision of 3 digits (see  [meter metrics/precision](https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics)). 
+Sending the total energy (kWh consumed and delivered) is also possible.
+Since those values are not changing much, it is sufficient to transmit them only every [TelePeriod](https://tasmota.github.io/docs/Commands/#teleperiod) seconds.
+<br>Again, the important parts are the last two of each line, where `3` in this case means that you will get a precision of 3 digits (see  [meter metrics/precision](https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics)).
 ```
 1,77070100010800ff@1000,Total Consumed,KWh,energy_forward,3
 1,77070100020800ff@1000,Total Delivered,KWh,energy_reverse,3
@@ -178,7 +178,7 @@ For this to work, set the MQTT part of `config.ini` to `localhost` and enable th
 
 
 The topic in tasmota has to fit together with the config.ini. For example:
-```  
+```
 Tasmota Topic: SML
 Tasmota Full Topic: %topic%/
 config.ini topic = SML/SENSOR
@@ -272,7 +272,7 @@ It's possible to have multiple instances, but it's not automated. Follow these s
     sed -i 's:dbus-mqtt-grid:'$driverclone':g' /data/etc/$driverclone/service/log/run
     ```
 
-5. Change the `device_name` and increase the `device_instance` in the `config.ini`
+5. Change the `device_name`, increase the `device_instance` and update the `topic` in the `config.ini`
 
 Now you can install and run the cloned driver. Should you need another instance just increase the number in step 1 and repeat all steps.
 
