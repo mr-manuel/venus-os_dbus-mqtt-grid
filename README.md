@@ -105,7 +105,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
             "current": 0.0,
             "frequency": 0.0000,
             "energy_forward": 0.0,
-            "energy_reverse": 0.0,
+            "energy_reverse": 0.0
         },
         "L2": {
             "power": 0.0,
@@ -113,7 +113,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
             "current": 0.0,
             "frequency": 0.0000,
             "energy_forward": 0.0,
-            "energy_reverse": 0.0,
+            "energy_reverse": 0.0
         },
         "L3": {
             "power": 0.0,
@@ -121,7 +121,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
             "current": 0.0,
             "frequency": 0.0000,
             "energy_forward": 0.0,
-            "energy_reverse": 0.0,
+            "energy_reverse": 0.0
         }
     }
 }
