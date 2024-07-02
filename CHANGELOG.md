@@ -1,7 +1,8 @@
 # Changelog
 
-## v0.1.5 (not releaded yet)
+## v0.1.5
 * Added: Error handling
+* Changed: Fixed problems when timeout was set to `0`.
 * Changed: Handling when voltage=0 is provided and no current
 
 ## v0.1.4
