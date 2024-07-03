@@ -1,4 +1,4 @@
-# dbus-mqtt-grid - Emulates a physical Grid Meter from MQTT data
+# dbus-mqtt-grid - Emulates a physical Grid/Genset/AC Load Meter from MQTT data
 
 <small>GitHub repository: [mr-manuel/venus-os_dbus-mqtt-grid](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid)</small>
 
@@ -16,7 +16,7 @@ You like the project and you want to support me?
 
 ### Purpose
 
-The script emulates a physical Grid Meter in Venus OS. It gets the MQTT data from a subscribed topic and publishes the information on the dbus as the service `com.victronenergy.grid.mqtt_grid` with the VRM instance `31`.
+The script emulates a physical Grid/Genset/AC Load Meter in Venus OS. It gets the MQTT data from a subscribed topic and publishes the information on the dbus as the service `com.victronenergy.grid.mqtt_grid`, `com.victronenergy.genset.mqtt_genset` or `com.victronenergy.acload.mqtt_acload` with the VRM instance `31`.
 
 It also supports the Tasmota-SmartMeter format.
 

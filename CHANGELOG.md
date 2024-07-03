@@ -1,8 +1,11 @@
 # Changelog
 
+## v0.1.6 (not released yet)
+* Added: Set device type to `grid`, `genset` or `acload`
+
 ## v0.1.5
 * Added: Error handling
-* Changed: Fixed problems when timeout was set to `0`.
+* Changed: Fixed problems when timeout was set to `0`
 * Changed: Handling when voltage=0 is provided and no current
 
 ## v0.1.4

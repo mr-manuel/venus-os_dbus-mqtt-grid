@@ -67,6 +67,30 @@ else:
     logging.basicConfig(level=logging.WARNING)
 
 
+# check device_type
+if "DEFAULT" in config and "device_type" in config["DEFAULT"]:
+    if config["DEFAULT"]["device_type"] == "grid":
+        device_type = "grid"
+        device_type_name = "Grid"
+    elif config["DEFAULT"]["device_type"] == "genset":
+        device_type = "genset"
+        device_type_name = "Genset"
+    elif config["DEFAULT"]["device_type"] == "acload":
+        device_type = "acload"
+        device_type_name = "AC Load"
+    else:
+        logging.warning(
+            'The "device_type" in the "config.ini" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.'
+        )
+        device_type = "grid"
+        device_type_name = "Grid"
+else:
+    logging.warning(
+        'The "device_type" in the "config.ini" is not set at all. Check the config.sample.ini for allowed types. Fallback to "grid" for now.'
+    )
+    device_type = "grid"
+    device_type_name = "Grid"
+
 # get timeout
 if "DEFAULT" in config and "timeout" in config["DEFAULT"]:
     timeout = int(config["DEFAULT"]["timeout"])
@@ -360,9 +384,9 @@ class DbusMqttGridService:
         servicename,
         deviceinstance,
         paths,
-        productname="MQTT Grid",
-        customname="MQTT Grid",
-        connection="MQTT Grid service",
+        productname="MQTT " + device_type_name,
+        customname="MQTT " + device_type_name,
+        connection="MQTT " + device_type_name + " service",
     ):
         self._dbusservice = VeDbusService(servicename)
         self._paths = paths
@@ -382,7 +406,7 @@ class DbusMqttGridService:
         self._dbusservice.add_path("/ProductId", 0xFFFF)
         self._dbusservice.add_path("/ProductName", productname)
         self._dbusservice.add_path("/CustomName", customname)
-        self._dbusservice.add_path("/FirmwareVersion", "0.1.5 (20240702)")
+        self._dbusservice.add_path("/FirmwareVersion", "0.1.6 (20240703)")
         # self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path("/Connected", 1)
 
@@ -727,10 +751,10 @@ def main():
         )
 
     DbusMqttGridService(
-        servicename="com.victronenergy.grid.mqtt_grid_"
+        servicename="com.victronenergy." + device_type + ".mqtt_" + device_type + "_"
         + str(config["DEFAULT"]["device_instance"]),
         deviceinstance=int(config["DEFAULT"]["device_instance"]),
-        customname=config["DEFAULT"]["device_name"],
+        customname=config["DEFAULT"]["device_name"] if config["DEFAULT"]["device_name"] != "MQTT Grid" else "MQTT " + device_type_name,
         paths=paths_dbus,
     )
 
