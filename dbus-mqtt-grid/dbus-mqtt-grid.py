@@ -169,10 +169,10 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     try:
-        global last_changed, grid_power, grid_current, grid_voltage, grid_forward, grid_reverse, \
-            grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_frequency, grid_L1_forward, grid_L1_reverse, \
-            grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_frequency, grid_L2_forward, grid_L2_reverse, \
-            grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_frequency, grid_L3_forward, grid_L3_reverse
+        global last_changed, grid_power, grid_current, grid_voltage, grid_forward, grid_reverse
+        global grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_frequency, grid_L1_forward, grid_L1_reverse
+        global grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_frequency, grid_L2_forward, grid_L2_reverse
+        global grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_frequency, grid_L3_forward, grid_L3_reverse
 
         # get JSON from topic
         if msg.topic == config["MQTT"]["topic"]:
@@ -215,7 +215,9 @@ def on_message(client, userdata, msg):
                                 "L1" in jsonpayload["grid"]
                                 and "power" in jsonpayload["grid"]["L1"]
                             ):
-                                grid_L1_power = float(jsonpayload["grid"]["L1"]["power"])
+                                grid_L1_power = float(
+                                    jsonpayload["grid"]["L1"]["power"]
+                                )
                                 grid_L1_voltage = (
                                     float(jsonpayload["grid"]["L1"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L1"]
@@ -228,7 +230,6 @@ def on_message(client, userdata, msg):
                                         grid_L1_power / grid_L1_voltage
                                         if grid_L1_voltage != 0
                                         else 0
-
                                     )
                                 )
                                 grid_L1_frequency = (
@@ -252,7 +253,9 @@ def on_message(client, userdata, msg):
                                 "L2" in jsonpayload["grid"]
                                 and "power" in jsonpayload["grid"]["L2"]
                             ):
-                                grid_L2_power = float(jsonpayload["grid"]["L2"]["power"])
+                                grid_L2_power = float(
+                                    jsonpayload["grid"]["L2"]["power"]
+                                )
                                 grid_L2_voltage = (
                                     float(jsonpayload["grid"]["L2"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L2"]
@@ -288,7 +291,9 @@ def on_message(client, userdata, msg):
                                 "L3" in jsonpayload["grid"]
                                 and "power" in jsonpayload["grid"]["L3"]
                             ):
-                                grid_L3_power = float(jsonpayload["grid"]["L3"]["power"])
+                                grid_L3_power = float(
+                                    jsonpayload["grid"]["L3"]["power"]
+                                )
                                 grid_L3_voltage = (
                                     float(jsonpayload["grid"]["L3"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L3"]
@@ -301,7 +306,6 @@ def on_message(client, userdata, msg):
                                         grid_L3_power / grid_L3_voltage
                                         if grid_L3_voltage != 0
                                         else 0
-
                                     )
                                 )
                                 grid_L3_frequency = (
@@ -325,21 +329,27 @@ def on_message(client, userdata, msg):
                         elif "power_L1" in jsonpayload["grid"]:
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
                             grid_L1_voltage = float(config["DEFAULT"]["voltage"])
-                            grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
+                            grid_L1_current = grid_L1_power / float(
+                                config["DEFAULT"]["voltage"]
+                            )
                             grid_L1_frequency = None
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
                             grid_L2_voltage = float(config["DEFAULT"]["voltage"])
-                            grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
+                            grid_L2_current = grid_L2_power / float(
+                                config["DEFAULT"]["voltage"]
+                            )
                             grid_L2_frequency = None
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
-                            grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
+                            grid_L3_current = grid_L3_power / float(
+                                config["DEFAULT"]["voltage"]
+                            )
                             grid_L3_frequency = None
                             grid_L3_forward = 0
                             grid_L3_reverse = 0
@@ -445,23 +455,23 @@ class DbusMqttGridService:
                     round(grid_voltage, 2) if grid_voltage is not None else None
                 )
                 if grid_forward is not None:
-                    self._dbusservice["/Ac/Energy/Forward"] = (
-                        round(grid_forward, 2)
-                    )
+                    self._dbusservice["/Ac/Energy/Forward"] = round(grid_forward, 2)
                 if grid_reverse is not None:
-                    self._dbusservice["/Ac/Energy/Reverse"] = (
-                        round(grid_reverse, 2)
-                    )
+                    self._dbusservice["/Ac/Energy/Reverse"] = round(grid_reverse, 2)
 
                 if grid_L1_power is not None:
                     self._dbusservice["/Ac/L1/Power"] = (
                         round(grid_L1_power, 2) if grid_L1_power is not None else None
                     )
                     self._dbusservice["/Ac/L1/Current"] = (
-                        round(grid_L1_current, 2) if grid_L1_current is not None else None
+                        round(grid_L1_current, 2)
+                        if grid_L1_current is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L1/Voltage"] = (
-                        round(grid_L1_voltage, 2) if grid_L1_voltage is not None else None
+                        round(grid_L1_voltage, 2)
+                        if grid_L1_voltage is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L1/Frequency"] = (
                         round(grid_L1_frequency, 2)
@@ -469,10 +479,14 @@ class DbusMqttGridService:
                         else None
                     )
                     self._dbusservice["/Ac/L1/Energy/Forward"] = (
-                        round(grid_L1_forward, 2) if grid_L1_forward is not None else None
+                        round(grid_L1_forward, 2)
+                        if grid_L1_forward is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L1/Energy/Reverse"] = (
-                        round(grid_L1_reverse, 2) if grid_L1_reverse is not None else None
+                        round(grid_L1_reverse, 2)
+                        if grid_L1_reverse is not None
+                        else None
                     )
                 else:
                     self._dbusservice["/Ac/L1/Power"] = (
@@ -497,10 +511,14 @@ class DbusMqttGridService:
                         round(grid_L2_power, 2) if grid_L2_power is not None else None
                     )
                     self._dbusservice["/Ac/L2/Current"] = (
-                        round(grid_L2_current, 2) if grid_L2_current is not None else None
+                        round(grid_L2_current, 2)
+                        if grid_L2_current is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L2/Voltage"] = (
-                        round(grid_L2_voltage, 2) if grid_L2_voltage is not None else None
+                        round(grid_L2_voltage, 2)
+                        if grid_L2_voltage is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L2/Frequency"] = (
                         round(grid_L2_frequency, 2)
@@ -508,10 +526,14 @@ class DbusMqttGridService:
                         else None
                     )
                     self._dbusservice["/Ac/L2/Energy/Forward"] = (
-                        round(grid_L2_forward, 2) if grid_L2_forward is not None else None
+                        round(grid_L2_forward, 2)
+                        if grid_L2_forward is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L2/Energy/Reverse"] = (
-                        round(grid_L2_reverse, 2) if grid_L2_reverse is not None else None
+                        round(grid_L2_reverse, 2)
+                        if grid_L2_reverse is not None
+                        else None
                     )
 
                 if grid_L3_power is not None:
@@ -519,10 +541,14 @@ class DbusMqttGridService:
                         round(grid_L3_power, 2) if grid_L3_power is not None else None
                     )
                     self._dbusservice["/Ac/L3/Current"] = (
-                        round(grid_L3_current, 2) if grid_L3_current is not None else None
+                        round(grid_L3_current, 2)
+                        if grid_L3_current is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L3/Voltage"] = (
-                        round(grid_L3_voltage, 2) if grid_L3_voltage is not None else None
+                        round(grid_L3_voltage, 2)
+                        if grid_L3_voltage is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L3/Frequency"] = (
                         round(grid_L3_frequency, 2)
@@ -530,10 +556,14 @@ class DbusMqttGridService:
                         else None
                     )
                     self._dbusservice["/Ac/L3/Energy/Forward"] = (
-                        round(grid_L3_forward, 2) if grid_L3_forward is not None else None
+                        round(grid_L3_forward, 2)
+                        if grid_L3_forward is not None
+                        else None
                     )
                     self._dbusservice["/Ac/L3/Energy/Reverse"] = (
-                        round(grid_L3_reverse, 2) if grid_L3_reverse is not None else None
+                        round(grid_L3_reverse, 2)
+                        if grid_L3_reverse is not None
+                        else None
                     )
 
                 logging.debug(
@@ -618,7 +648,12 @@ def main():
     DBusGMainLoop(set_as_default=True)
 
     # MQTT setup
-    client = mqtt.Client("MqttGrid_" + get_vrm_portal_id() + "_" + str(config["DEFAULT"]["device_instance"]))
+    client = mqtt.Client(
+        "MqttGrid_"
+        + get_vrm_portal_id()
+        + "_"
+        + str(config["DEFAULT"]["device_instance"])
+    )
     client.on_disconnect = on_disconnect
     client.on_connect = on_connect
     client.on_message = on_message
@@ -755,10 +790,18 @@ def main():
         )
 
     DbusMqttGridService(
-        servicename="com.victronenergy." + device_type + ".mqtt_" + device_type + "_"
+        servicename="com.victronenergy."
+        + device_type
+        + ".mqtt_"
+        + device_type
+        + "_"
         + str(config["DEFAULT"]["device_instance"]),
         deviceinstance=int(config["DEFAULT"]["device_instance"]),
-        customname=config["DEFAULT"]["device_name"] if config["DEFAULT"]["device_name"] != "MQTT Grid" else "MQTT " + device_type_name,
+        customname=(
+            config["DEFAULT"]["device_name"]
+            if config["DEFAULT"]["device_name"] != "MQTT Grid"
+            else "MQTT " + device_type_name
+        ),
         paths=paths_dbus,
     )
 
