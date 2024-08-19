@@ -2,6 +2,7 @@
 
 ## v0.1.6
 * Added: Set device type to `grid`, `genset` or `acload`
+* Changed: Add VRM ID to MQTT client name
 * Changed: Fix registration to dbus https://github.com/victronenergy/velib_python/commit/494f9aef38f46d6cfcddd8b1242336a0a3a79563
 
 ## v0.1.5
