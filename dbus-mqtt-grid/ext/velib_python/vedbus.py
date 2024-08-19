@@ -58,12 +58,13 @@ from ve_utils import wrap_dbus_value, unwrap_dbus_value
 
 # Export ourselves as a D-Bus service.
 class VeDbusService(object):
-	def __init__(self, servicename, bus=None):
+	def __init__(self, servicename, bus=None, register=True):
 		# dict containing the VeDbusItemExport objects, with their path as the key.
 		self._dbusobjects = {}
 		self._dbusnodes = {}
 		self._ratelimiters = []
 		self._dbusname = None
+		self.name = servicename
 
 		# dict containing the onchange callbacks, for each object. Object path is the key
 		self._onchangecallbacks = {}
@@ -74,13 +75,21 @@ class VeDbusService(object):
 		# make the dbus connection available to outside, could make this a true property instead, but ach..
 		self.dbusconn = self._dbusconn
 
-		# Register ourselves on the dbus, trigger an error if already in use (do_not_queue)
-		self._dbusname = dbus.service.BusName(servicename, self._dbusconn, do_not_queue=True)
-
 		# Add the root item that will return all items as a tree
 		self._dbusnodes['/'] = VeDbusRootExport(self._dbusconn, '/', self)
 
-		logging.info("registered ourselves on D-Bus as %s" % servicename)
+		# Immediately register the service unless requested not to
+		if register:
+			logging.warning("USING OUTDATED REGISTRATION METHOD!")
+			logging.warning("Please set register=False, then call the register method "
+				"after adding all mandatory paths. See "
+				"https://github.com/victronenergy/venus/wiki/dbus-api")
+			self.register()
+
+	def register(self):
+		# Register ourselves on the dbus, trigger an error if already in use (do_not_queue)
+		self._dbusname = dbus.service.BusName(self.name, self._dbusconn, do_not_queue=True)
+		logging.info("registered ourselves on D-Bus as %s" % self.name)
 
 	# To force immediate deregistering of this dbus service and all its object paths, explicitly
 	# call __del__().
@@ -95,17 +104,20 @@ class VeDbusService(object):
 			self._dbusname.__del__()  # Forces call to self._bus.release_name(self._name), see source code
 		self._dbusname = None
 
+	def get_name(self):
+		return self._dbusname.get_name()
+
 	# @param callbackonchange	function that will be called when this value is changed. First parameter will
 	#							be the path of the object, second the new value. This callback should return
 	#							True to accept the change, False to reject it.
 	def add_path(self, path, value, description="", writeable=False,
-					onchangecallback=None, gettextcallback=None, valuetype=None):
+					onchangecallback=None, gettextcallback=None, valuetype=None, itemtype=None):
 
 		if onchangecallback is not None:
 			self._onchangecallbacks[path] = onchangecallback
 
-		item = VeDbusItemExport(
-				self._dbusconn, path, value, description, writeable,
+		itemtype = itemtype or VeDbusItemExport
+		item = itemtype(self._dbusconn, path, value, description, writeable,
 				self._value_changed, gettextcallback, deletecallback=self._item_deleted, valuetype=valuetype)
 
 		spl = path.split('/')
@@ -115,6 +127,7 @@ class VeDbusService(object):
 				self._dbusnodes[subPath] = VeDbusTreeExport(self._dbusconn, subPath, self)
 		self._dbusobjects[path] = item
 		logging.debug('added %s with start value %s. Writeable is %s' % (path, value, writeable))
+		return item
 
 	# Add the mandatory paths, as per victron dbus api doc
 	def add_mandatory_paths(self, processname, processversion, connection,
@@ -179,6 +192,9 @@ class ServiceContext(object):
 		self.parent = parent
 		self.changes = {}
 
+	def __contains__(self, path):
+		return path in self.parent
+
 	def __getitem__(self, path):
 		return self.parent[path]
 
@@ -187,9 +203,32 @@ class ServiceContext(object):
 		if c is not None:
 			self.changes[path] = c
 
+	def __delitem__(self, path):
+		if path in self.changes:
+			del self.changes[path]
+		del self.parent[path]
+
 	def flush(self):
 		if self.changes:
 			self.parent._dbusnodes['/'].ItemsChanged(self.changes)
+			self.changes.clear()
+
+	def add_path(self, path, value, *args, **kwargs):
+		self.parent.add_path(path, value, *args, **kwargs)
+		self.changes[path] = {
+			'Value': wrap_dbus_value(value),
+			'Text': self.parent._dbusobjects[path].GetText()
+		}
+
+	def del_tree(self, root):
+		root = root.rstrip('/')
+		for p in list(self.parent._dbusobjects.keys()):
+			if p == root or p.startswith(root + '/'):
+				self[p] = None
+				self.parent._dbusobjects[p].__del__()
+
+	def get_name(self):
+		return self.parent.get_name()
 
 class TrackerDict(defaultdict):
 	""" Same as defaultdict, but passes the key to default_factory. """
