@@ -8,7 +8,7 @@ import os
 from time import sleep, time
 import json
 import paho.mqtt.client as mqtt
-import configparser  # for config/ini file
+from configparser import ConfigParser
 import _thread
 
 # import Victron Energy packages
@@ -16,25 +16,18 @@ sys.path.insert(1, os.path.join(os.path.dirname(__file__), "ext", "velib_python"
 from vedbus import VeDbusService  # noqa: E402
 from ve_utils import get_vrm_portal_id  # noqa: E402
 
-
 # get values from config.ini file
 try:
     config_file = (os.path.dirname(os.path.realpath(__file__))) + "/config.ini"
     if os.path.exists(config_file):
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read(config_file)
         if config["MQTT"]["broker_address"] == "IP_ADDR_OR_FQDN":
-            print(
-                'ERROR:The "config.ini" is using invalid default values like IP_ADDR_OR_FQDN. The driver restarts in 60 seconds.'
-            )
+            print('ERROR:The "config.ini" is using invalid default values like IP_ADDR_OR_FQDN. The driver restarts in 60 seconds.')
             sleep(60)
             sys.exit()
     else:
-        print(
-            'ERROR:The "'
-            + config_file
-            + '" is not found. Did you copy or rename the "config.sample.ini" to "config.ini"? The driver restarts in 60 seconds.'
-        )
+        print('ERROR:The "' + config_file + '" is not found. Did you copy or rename the "config.sample.ini" to "config.ini"? The driver restarts in 60 seconds.')
         sleep(60)
         sys.exit()
 
@@ -42,13 +35,10 @@ except Exception:
     exception_type, exception_object, exception_traceback = sys.exc_info()
     file = exception_traceback.tb_frame.f_code.co_filename
     line = exception_traceback.tb_lineno
-    print(
-        f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
-    )
+    print(f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}")
     print("ERROR:The driver restarts in 60 seconds.")
     sleep(60)
     sys.exit()
-
 
 # Get logging level from config.ini
 # ERROR = shows errors only
@@ -67,7 +57,6 @@ if "DEFAULT" in config and "logging" in config["DEFAULT"]:
 else:
     logging.basicConfig(level=logging.WARNING)
 
-
 # check device_type
 if "DEFAULT" in config and "device_type" in config["DEFAULT"]:
     if config["DEFAULT"]["device_type"] == "grid":
@@ -80,15 +69,11 @@ if "DEFAULT" in config and "device_type" in config["DEFAULT"]:
         device_type = "acload"
         device_type_name = "AC Load"
     else:
-        logging.warning(
-            'The "device_type" in the "config.ini" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.'
-        )
+        logging.warning('The "device_type" in the "config.ini" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
         device_type = "grid"
         device_type_name = "Grid"
 else:
-    logging.warning(
-        'The "device_type" in the "config.ini" is not set at all. Check the config.sample.ini for allowed types. Fallback to "grid" for now.'
-    )
+    logging.warning('The "device_type" in the "config.ini" is not set at all. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
     device_type = "grid"
     device_type_name = "Grid"
 
@@ -97,7 +82,6 @@ if "DEFAULT" in config and "timeout" in config["DEFAULT"]:
     timeout = int(config["DEFAULT"]["timeout"])
 else:
     timeout = 60
-
 
 # set variables
 connected = 0
@@ -137,9 +121,7 @@ def on_disconnect(client, userdata, rc):
     global connected
     logging.warning("MQTT client: Got disconnected")
     if rc != 0:
-        logging.warning(
-            "MQTT client: Unexpected MQTT disconnection. Will auto-reconnect"
-        )
+        logging.warning("MQTT client: Unexpected MQTT disconnection. Will auto-reconnect")
     else:
         logging.warning("MQTT client: rc value:" + str(rc))
 
@@ -149,9 +131,7 @@ def on_disconnect(client, userdata, rc):
             client.connect(config["MQTT"]["broker_address"])
             connected = 1
         except Exception as err:
-            logging.error(
-                f"MQTT client: Error in retrying to connect with broker ({config['MQTT']['broker_address']}:{config['MQTT']['broker_port']}): {err}"
-            )
+            logging.error(f"MQTT client: Error in retrying to connect with broker ({config['MQTT']['broker_address']}:{config['MQTT']['broker_port']}): {err}")
             logging.error("MQTT client: Retrying in 15 seconds")
             connected = 0
             sleep(15)
@@ -250,8 +230,8 @@ def on_message(client, userdata, msg):
 
                             # check if L2 and L2 -> power exists
                             if (
-                                "L2" in jsonpayload["grid"]
-                                and "power" in jsonpayload["grid"]["L2"]
+                                    "L2" in jsonpayload["grid"]
+                                    and "power" in jsonpayload["grid"]["L2"]
                             ):
                                 grid_L2_power = float(
                                     jsonpayload["grid"]["L2"]["power"]
@@ -288,8 +268,8 @@ def on_message(client, userdata, msg):
 
                             # check if L3 and L3 -> power exists
                             if (
-                                "L3" in jsonpayload["grid"]
-                                and "power" in jsonpayload["grid"]["L3"]
+                                    "L3" in jsonpayload["grid"]
+                                    and "power" in jsonpayload["grid"]["L3"]
                             ):
                                 grid_L3_power = float(
                                     jsonpayload["grid"]["L3"]["power"]
@@ -354,25 +334,17 @@ def on_message(client, userdata, msg):
                             grid_L3_forward = 0
                             grid_L3_reverse = 0
                         else:
-                            logging.error(
-                                'Received JSON MQTT message does not include a power object in the grid object. Expected at least: {"grid": {"power": 0.0}"}'
-                            )
+                            logging.error('Received JSON MQTT message does not include a power object in the grid object. Expected at least: {"grid": {"power": 0.0}"}')
                             logging.debug("MQTT payload: " + str(msg.payload)[1:])
                     else:
-                        logging.error(
-                            'Received JSON MQTT message grid object is not of type dictionary. Expected at least: {"grid": {"power": 0.0}"}'
-                        )
+                        logging.error('Received JSON MQTT message grid object is not of type dictionary. Expected at least: {"grid": {"power": 0.0}"}')
                         logging.debug("MQTT payload: " + str(msg.payload)[1:])
                 else:
-                    logging.error(
-                        'Received JSON MQTT message does not include a grid object. Expected at least: {"grid": {"power": 0.0}"}'
-                    )
+                    logging.error('Received JSON MQTT message does not include a grid object. Expected at least: {"grid": {"power": 0.0}"}')
                     logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
             else:
-                logging.warning(
-                    "Received JSON MQTT message was empty and therefore it was ignored"
-                )
+                logging.warning("Received JSON MQTT message was empty and therefore it was ignored")
                 logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
     except ValueError as e:
@@ -383,9 +355,7 @@ def on_message(client, userdata, msg):
         exception_type, exception_object, exception_traceback = sys.exc_info()
         file = exception_traceback.tb_frame.f_code.co_filename
         line = exception_traceback.tb_lineno
-        print(
-            f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
-        )
+        print(f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}")
         logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
 
@@ -597,13 +567,10 @@ class DbusMqttGridService:
             file = exception_traceback.tb_frame.f_code.co_filename
             line = exception_traceback.tb_lineno
             if "/Ac/L" in repr(exception_object):
-                logging.error(
-                    f"Exception occurred: {repr(exception_object)}. You have to send all phase power values at the same time at startup."
-                )
+                logging.error(f"Exception occurred: {repr(exception_object)}. You have to send all phase power values at the same time at startup.")
             else:
-                logging.error(
-                    f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
-                )
+                logging.error(f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
+                              )
             logging.error("ERROR:The driver restarts now.")
             sys.exit()
 
@@ -611,18 +578,14 @@ class DbusMqttGridService:
             exception_type, exception_object, exception_traceback = sys.exc_info()
             file = exception_traceback.tb_frame.f_code.co_filename
             line = exception_traceback.tb_lineno
-            logging.error(
-                f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
-            )
+            logging.error(f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}"
+                          )
             logging.error("ERROR:The driver restarts now.")
             sys.exit()
 
         # quit driver if timeout is exceeded
         if timeout != 0 and (now - last_changed) > timeout:
-            logging.error(
-                "Driver stopped. Timeout of %i seconds exceeded, since no new MQTT message was received in this time."
-                % timeout
-            )
+            logging.error("Driver stopped. Timeout of %i seconds exceeded, since no new MQTT message was received in this time." % timeout)
             sys.exit()
 
         # increment UpdateIndex - to show that new data is available
@@ -666,18 +629,13 @@ def main():
             "tls_path_to_ca" in config["MQTT"]
             and config["MQTT"]["tls_path_to_ca"] != ""
         ):
-            logging.info(
-                'MQTT client: TLS: custom ca "%s" used'
-                % config["MQTT"]["tls_path_to_ca"]
-            )
+            logging.info('MQTT client: TLS: custom ca "%s" used' % config["MQTT"]["tls_path_to_ca"])
             client.tls_set(config["MQTT"]["tls_path_to_ca"], tls_version=2)
         else:
             client.tls_set(tls_version=2)
 
         if "tls_insecure" in config["MQTT"] and config["MQTT"]["tls_insecure"] != "":
-            logging.info(
-                "MQTT client: TLS certificate server hostname verification disabled"
-            )
+            logging.info("MQTT client: TLS certificate server hostname verification disabled")
             client.tls_insecure_set(True)
 
     # check if username and password are set
@@ -687,18 +645,13 @@ def main():
         and config["MQTT"]["username"] != ""
         and config["MQTT"]["password"] != ""
     ):
-        logging.info(
-            'MQTT client: Using username "%s" and password to connect'
-            % config["MQTT"]["username"]
-        )
+        logging.info('MQTT client: Using username "%s" and password to connect' % config["MQTT"]["username"])
         client.username_pw_set(
             username=config["MQTT"]["username"], password=config["MQTT"]["password"]
         )
 
     # connect to broker
-    logging.info(
-        f"MQTT client: Connecting to broker {config['MQTT']['broker_address']} on port {config['MQTT']['broker_port']}"
-    )
+    logging.info(f"MQTT client: Connecting to broker {config['MQTT']['broker_address']} on port {config['MQTT']['broker_port']}")
     client.connect(
         host=config["MQTT"]["broker_address"], port=int(config["MQTT"]["broker_port"])
     )
@@ -710,16 +663,11 @@ def main():
         if i % 12 != 0 or i == 0:
             logging.info("Waiting 5 seconds for receiving first data...")
         else:
-            logging.warning(
-                "Waiting since %s seconds for receiving first data..." % str(i * 5)
-            )
+            logging.warning("Waiting since %s seconds for receiving first data..." % str(i * 5))
 
         # check if timeout was exceeded
         if timeout != 0 and timeout <= (i * 5):
-            logging.error(
-                "Driver stopped. Timeout of %i seconds exceeded, since no new MQTT message was received in this time."
-                % timeout
-            )
+            logging.error("Driver stopped. Timeout of %i seconds exceeded, since no new MQTT message was received in this time." % timeout)
             sys.exit()
 
         sleep(5)
@@ -791,11 +739,11 @@ def main():
 
     DbusMqttGridService(
         servicename="com.victronenergy."
-        + device_type
-        + ".mqtt_"
-        + device_type
-        + "_"
-        + str(config["DEFAULT"]["device_instance"]),
+                    + device_type
+                    + ".mqtt_"
+                    + device_type
+                    + "_"
+                    + str(config["DEFAULT"]["device_instance"]),
         deviceinstance=int(config["DEFAULT"]["device_instance"]),
         customname=(
             config["DEFAULT"]["device_name"]
@@ -805,9 +753,7 @@ def main():
         paths=paths_dbus,
     )
 
-    logging.info(
-        "Connected to dbus and switching over to GLib.MainLoop() (= event based)"
-    )
+    logging.info("Connected to dbus and switching over to GLib.MainLoop() (= event based)")
     mainloop = GLib.MainLoop()
     mainloop.run()
 
