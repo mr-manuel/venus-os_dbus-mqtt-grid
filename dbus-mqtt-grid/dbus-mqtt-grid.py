@@ -18,12 +18,12 @@ from ve_utils import get_vrm_portal_id  # noqa: E402
 
 # get values from config.ini file
 config_name = "config.ini"
+config = ConfigParser()
 try:
     config_file = os.path.join(os.path.dirname(__file__), config_name)
     if os.path.exists(config_file):
-        config = ConfigParser()
         config.read(config_file)
-        if config["MQTT"]["broker_address"] == "IP_ADDR_OR_FQDN":
+        if config.get('MQTT', 'broker_address') == "IP_ADDR_OR_FQDN":
             print(f'ERROR:The "{config_name}" is using invalid default values like IP_ADDR_OR_FQDN. The driver restarts in 60 seconds.')
             sleep(60)
             sys.exit()
@@ -41,48 +41,32 @@ except Exception:
     sleep(60)
     sys.exit()
 
-# Get logging level from config.ini
-# ERROR = shows errors only
-# WARNING = shows ERROR and warnings
-# INFO = shows WARNING and running functions
-# DEBUG = shows INFO and data/values
-if "DEFAULT" in config and "logging" in config["DEFAULT"]:
-    if config["DEFAULT"]["logging"] == "DEBUG":
-        logging.basicConfig(level=logging.DEBUG)
-    elif config["DEFAULT"]["logging"] == "INFO":
-        logging.basicConfig(level=logging.INFO)
-    elif config["DEFAULT"]["logging"] == "ERROR":
-        logging.basicConfig(level=logging.ERROR)
-    else:
-        logging.basicConfig(level=logging.WARNING)
+# get logging level
+logging_level = config.get('DEFAULT', 'logging')
+if logging_level == logging.getLevelName(logging.DEBUG):
+    logging.basicConfig(level=logging.DEBUG)
+elif logging_level == logging.getLevelName(logging.INFO):
+    logging.basicConfig(level=logging.INFO)
+elif logging_level == logging.getLevelName(logging.WARNING):
+    logging.basicConfig(level=logging.WARNING)
+elif logging_level == logging.getLevelName(logging.ERROR):
+    logging.basicConfig(level=logging.ERROR)
 else:
     logging.basicConfig(level=logging.WARNING)
+    logging.warning(f'The logging level "{logging_level}" in the "{config_name}" is not allowed. Check the config.sample.ini for allowed types. Fallback to "WARNING" for now.')
 
-# check device_type
-if "DEFAULT" in config and "device_type" in config["DEFAULT"]:
-    if config["DEFAULT"]["device_type"] == "grid":
-        device_type = "grid"
-        device_type_name = "Grid"
-    elif config["DEFAULT"]["device_type"] == "genset":
-        device_type = "genset"
-        device_type_name = "Genset"
-    elif config["DEFAULT"]["device_type"] == "acload":
-        device_type = "acload"
-        device_type_name = "AC Load"
-    else:
-        logging.warning(f'The "device_type" in the "{config_name}" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
-        device_type = "grid"
-        device_type_name = "Grid"
-else:
-    logging.warning(f'The "device_type" in the "{config_name}" is not set at all. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
-    device_type = "grid"
-    device_type_name = "Grid"
+# get device_type
+device_types = {'grid': 'Grid', 'genset': 'Genset', 'acload': 'AC Load'}
+device_type = config.get('DEFAULT', 'device_type')
+try:
+    device_type_name = device_types[device_type]
+except KeyError as e:
+    logging.warning(f'The device_type "{device_type}" in the "{config_name}" is not an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
+    device_type = 'grid'
+    device_type_name = device_types[device_type]
 
 # get timeout
-if "DEFAULT" in config and "timeout" in config["DEFAULT"]:
-    timeout = int(config["DEFAULT"]["timeout"])
-else:
-    timeout = 60
+timeout = config.getint('DEFAULT', 'timeout', fallback=60)
 
 # set variables
 connected = 0
@@ -118,7 +102,7 @@ grid_L3_reverse = None
 
 
 # MQTT requests
-def on_disconnect(client, userdata, rc):
+def on_disconnect(client: mqtt.Client, userdata, rc):
     global connected
     logging.warning("MQTT client: Got disconnected")
     if rc != 0:
@@ -127,28 +111,30 @@ def on_disconnect(client, userdata, rc):
         logging.warning("MQTT client: rc value:" + str(rc))
 
     while connected == 0:
+        broker_address = config.get('MQTT', 'broker_address')
+        broker_port = config.getint('MQTT', 'broker_port')
         try:
             logging.warning("MQTT client: Trying to reconnect")
-            client.connect(config["MQTT"]["broker_address"])
+            client.connect(broker_address, broker_port)
             connected = 1
         except Exception as err:
-            logging.error(f"MQTT client: Error in retrying to connect with broker ({config['MQTT']['broker_address']}:{config['MQTT']['broker_port']}): {err}")
+            logging.error(f'MQTT client: Error in retrying to connect with broker ({broker_address}:{broker_port}): {err}')
             logging.error("MQTT client: Retrying in 15 seconds")
             connected = 0
             sleep(15)
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client: mqtt.Client, userdata, flags, rc):
     global connected
     if rc == 0:
         logging.info("MQTT client: Connected to MQTT broker!")
         connected = 1
-        client.subscribe(config["MQTT"]["topic"])
+        client.subscribe(config.get('MQTT', 'topic'))
     else:
         logging.error("MQTT client: Failed to connect, return code %d\n", rc)
 
 
-def on_message(client, userdata, msg):
+def on_message(client: mqtt.Client, userdata, msg):
     try:
         global last_changed, grid_power, grid_current, grid_voltage, grid_forward, grid_reverse
         global grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_frequency, grid_L1_forward, grid_L1_reverse
@@ -156,11 +142,12 @@ def on_message(client, userdata, msg):
         global grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_frequency, grid_L3_forward, grid_L3_reverse
 
         # get JSON from topic
-        if msg.topic == config["MQTT"]["topic"]:
+        if msg.topic == config.get('MQTT', 'topic'):
             if msg.payload != "" and msg.payload != b"":
                 jsonpayload = json.loads(msg.payload)
 
                 last_changed = int(time())
+                default_voltage = float(config["DEFAULT"]["voltage"])
 
                 if "grid" in jsonpayload:
                     if isinstance(jsonpayload["grid"], dict):
@@ -169,7 +156,7 @@ def on_message(client, userdata, msg):
                             grid_voltage = (
                                 float(jsonpayload["grid"]["voltage"])
                                 if "voltage" in jsonpayload["grid"]
-                                else float(config["DEFAULT"]["voltage"])
+                                else default_voltage
                             )
                             grid_current = (
                                 float(jsonpayload["grid"]["current"])
@@ -200,7 +187,7 @@ def on_message(client, userdata, msg):
                                 grid_L1_voltage = (
                                     float(jsonpayload["grid"]["L1"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L1"]
-                                    else float(config["DEFAULT"]["voltage"])
+                                    else default_voltage
                                 )
                                 grid_L1_current = (
                                     float(jsonpayload["grid"]["L1"]["current"])
@@ -233,7 +220,7 @@ def on_message(client, userdata, msg):
                                 grid_L2_voltage = (
                                     float(jsonpayload["grid"]["L2"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L2"]
-                                    else float(config["DEFAULT"]["voltage"])
+                                    else default_voltage
                                 )
                                 grid_L2_current = (
                                     float(jsonpayload["grid"]["L2"]["current"])
@@ -266,7 +253,7 @@ def on_message(client, userdata, msg):
                                 grid_L3_voltage = (
                                     float(jsonpayload["grid"]["L3"]["voltage"])
                                     if "voltage" in jsonpayload["grid"]["L3"]
-                                    else float(config["DEFAULT"]["voltage"])
+                                    else default_voltage
                                 )
                                 grid_L3_current = (
                                     float(jsonpayload["grid"]["L3"]["current"])
@@ -297,21 +284,21 @@ def on_message(client, userdata, msg):
                         # power as last one, else on startup the phases are not correctly recognized
                         elif "power_L1" in jsonpayload["grid"]:
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
-                            grid_L1_voltage = float(config["DEFAULT"]["voltage"])
+                            grid_L1_voltage = default_voltage
                             grid_L1_current = grid_L1_power / grid_L1_voltage
                             grid_L1_frequency = None
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
-                            grid_L2_voltage = float(config["DEFAULT"]["voltage"])
+                            grid_L2_voltage = default_voltage
                             grid_L2_current = grid_L2_power / grid_L2_voltage
                             grid_L2_frequency = None
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
-                            grid_L3_voltage = float(config["DEFAULT"]["voltage"])
+                            grid_L3_voltage = default_voltage
                             grid_L3_current = grid_L3_power / grid_L3_voltage
                             grid_L3_frequency = None
                             grid_L3_forward = 0
@@ -338,7 +325,7 @@ def on_message(client, userdata, msg):
         exception_type, exception_object, exception_traceback = sys.exc_info()
         file = exception_traceback.tb_frame.f_code.co_filename
         line = exception_traceback.tb_lineno
-        print(f"Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}")
+        print(f'Exception occurred: {repr(exception_object)} of type {exception_type} in {file} line #{line}')
         logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
 
@@ -586,20 +573,13 @@ class DbusMqttGridService:
 def main():
     _thread.daemon = True  # allow the program to quit
 
-    from dbus.mainloop.glib import (
-        DBusGMainLoop,
-    )  # pyright: ignore[reportMissingImports]
+    from dbus.mainloop.glib import (DBusGMainLoop)  # pyright: ignore[reportMissingImports]
 
     # Have a mainloop, so we can send/receive asynchronous calls to and from dbus
     DBusGMainLoop(set_as_default=True)
 
     # MQTT setup
-    client = mqtt.Client(
-        "MqttGrid_"
-        + get_vrm_portal_id()
-        + "_"
-        + str(config["DEFAULT"]["device_instance"])
-    )
+    client = mqtt.Client("MqttGrid_" + get_vrm_portal_id() + "_" + str(config["DEFAULT"]["device_instance"]))
     client.on_disconnect = on_disconnect
     client.on_connect = on_connect
     client.on_message = on_message
@@ -619,22 +599,15 @@ def main():
             client.tls_insecure_set(True)
 
     # check if username and password are set
-    if (
-        "username" in config["MQTT"]
-        and "password" in config["MQTT"]
-        and config["MQTT"]["username"] != ""
-        and config["MQTT"]["password"] != ""
-    ):
-        logging.info('MQTT client: Using username "%s" and password to connect' % config["MQTT"]["username"])
-        client.username_pw_set(
-            username=config["MQTT"]["username"], password=config["MQTT"]["password"]
-        )
+    if username := config.get('MQTT', 'username', fallback=False) and config.get('MQTT', 'password', fallback=False):
+        logging.info(f"MQTT client: Using username and password to connect")
+        client.username_pw_set(username=config['MQTT']['username'], password=config['MQTT']['password'])
 
     # connect to broker
-    logging.info(f"MQTT client: Connecting to broker {config['MQTT']['broker_address']} on port {config['MQTT']['broker_port']}")
-    client.connect(
-        host=config["MQTT"]["broker_address"], port=int(config["MQTT"]["broker_port"])
-    )
+    broker_address = config.get('MQTT', 'broker_address')
+    broker_port = config.getint('MQTT', 'broker_port')
+    logging.info(f"MQTT client: Connecting to broker {broker_address} on port {broker_port}")
+    client.connect(broker_address, broker_port)
     client.loop_start()
 
     # wait to receive first data, else the JSON is empty and phase setup won't work
