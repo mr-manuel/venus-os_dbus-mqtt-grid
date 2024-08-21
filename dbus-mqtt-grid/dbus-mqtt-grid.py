@@ -19,7 +19,7 @@ from ve_utils import get_vrm_portal_id  # noqa: E402
 # get values from config.ini file
 config_name = "config.ini"
 try:
-    config_file = (os.path.dirname(os.path.realpath(__file__))) + "/config.ini"
+    config_file = os.path.join(os.path.dirname(__file__), config_name)
     if os.path.exists(config_file):
         config = ConfigParser()
         config.read(config_file)
