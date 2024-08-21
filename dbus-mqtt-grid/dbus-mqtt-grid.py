@@ -227,10 +227,7 @@ def on_message(client, userdata, msg):
                                 )
 
                             # check if L2 and L2 -> power exists
-                            if (
-                                    "L2" in jsonpayload["grid"]
-                                    and "power" in jsonpayload["grid"]["L2"]
-                            ):
+                            if "L2" in jsonpayload["grid"] and "power" in jsonpayload["grid"]["L2"]:
                                 grid_L2_power = float(jsonpayload["grid"]["L2"]["power"])
                                 grid_L2_voltage = (
                                     float(jsonpayload["grid"]["L2"]["voltage"])
@@ -263,10 +260,7 @@ def on_message(client, userdata, msg):
                                 )
 
                             # check if L3 and L3 -> power exists
-                            if (
-                                    "L3" in jsonpayload["grid"]
-                                    and "power" in jsonpayload["grid"]["L3"]
-                            ):
+                            if "L3" in jsonpayload["grid"] and "power" in jsonpayload["grid"]["L3"]:
                                 grid_L3_power = float(jsonpayload["grid"]["L3"]["power"])
                                 grid_L3_voltage = (
                                     float(jsonpayload["grid"]["L3"]["voltage"])
@@ -613,10 +607,7 @@ def main():
     if "tls_enabled" in config["MQTT"] and config["MQTT"]["tls_enabled"] == "1":
         logging.info("MQTT client: TLS is enabled")
 
-        if (
-            "tls_path_to_ca" in config["MQTT"]
-            and config["MQTT"]["tls_path_to_ca"] != ""
-        ):
+        if "tls_path_to_ca" in config["MQTT"] and config["MQTT"]["tls_path_to_ca"] != "":
             logging.info('MQTT client: TLS: custom ca "%s" used' % config["MQTT"]["tls_path_to_ca"])
             client.tls_set(config["MQTT"]["tls_path_to_ca"], tls_version=2)
         else:
