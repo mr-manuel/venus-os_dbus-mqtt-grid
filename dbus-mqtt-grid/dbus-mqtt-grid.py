@@ -17,17 +17,18 @@ from vedbus import VeDbusService  # noqa: E402
 from ve_utils import get_vrm_portal_id  # noqa: E402
 
 # get values from config.ini file
+config_name = "config.ini"
 try:
     config_file = (os.path.dirname(os.path.realpath(__file__))) + "/config.ini"
     if os.path.exists(config_file):
         config = ConfigParser()
         config.read(config_file)
         if config["MQTT"]["broker_address"] == "IP_ADDR_OR_FQDN":
-            print('ERROR:The "config.ini" is using invalid default values like IP_ADDR_OR_FQDN. The driver restarts in 60 seconds.')
+            print(f'ERROR:The "{config_name}" is using invalid default values like IP_ADDR_OR_FQDN. The driver restarts in 60 seconds.')
             sleep(60)
             sys.exit()
     else:
-        print('ERROR:The "' + config_file + '" is not found. Did you copy or rename the "config.sample.ini" to "config.ini"? The driver restarts in 60 seconds.')
+        print(f'ERROR:The "{config_file}" is not found. Did you copy or rename the "config.sample.ini" to "{config_name}"? The driver restarts in 60 seconds.')
         sleep(60)
         sys.exit()
 
@@ -69,11 +70,11 @@ if "DEFAULT" in config and "device_type" in config["DEFAULT"]:
         device_type = "acload"
         device_type_name = "AC Load"
     else:
-        logging.warning('The "device_type" in the "config.ini" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
+        logging.warning(f'The "device_type" in the "{config_name}" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
         device_type = "grid"
         device_type_name = "Grid"
 else:
-    logging.warning('The "device_type" in the "config.ini" is not set at all. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
+    logging.warning(f'The "device_type" in the "{config_name}" is not set at all. Check the config.sample.ini for allowed types. Fallback to "grid" for now.')
     device_type = "grid"
     device_type_name = "Grid"
 
