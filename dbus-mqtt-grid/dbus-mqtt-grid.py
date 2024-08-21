@@ -298,21 +298,21 @@ def on_message(client, userdata, msg):
                         elif "power_L1" in jsonpayload["grid"]:
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
                             grid_L1_voltage = float(config["DEFAULT"]["voltage"])
-                            grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
+                            grid_L1_current = grid_L1_power / grid_L1_voltage
                             grid_L1_frequency = None
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
                             grid_L2_voltage = float(config["DEFAULT"]["voltage"])
-                            grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
+                            grid_L2_current = grid_L2_power / grid_L2_voltage
                             grid_L2_frequency = None
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
-                            grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
+                            grid_L3_current = grid_L3_power / grid_L3_voltage
                             grid_L3_frequency = None
                             grid_L3_forward = 0
                             grid_L3_reverse = 0
