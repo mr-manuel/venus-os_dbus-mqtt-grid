@@ -79,6 +79,9 @@ if "DEFAULT" in config and "device_type" in config["DEFAULT"]:
     elif config["DEFAULT"]["device_type"] == "acload":
         device_type = "acload"
         device_type_name = "AC Load"
+    elif config["DEFAULT"]["device_type"] == "heatpump":
+        device_type = "heatpump"
+        device_type_name = "Heat Pump"
     else:
         logging.warning(
             'The "device_type" in the "config.ini" is not set to an allowed type. Check the config.sample.ini for allowed types. Fallback to "grid" for now.'
