@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.x
+* Added: Device type `heatpump`
+* Added: Filter power values out of range
+
 ## v0.1.6
 * Added: Set device type to `grid`, `genset` or `acload`
 * Changed: Add VRM ID to MQTT client name

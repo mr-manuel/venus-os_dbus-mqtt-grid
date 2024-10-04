@@ -89,6 +89,12 @@ if "DEFAULT" in config and "timeout" in config["DEFAULT"]:
 else:
     timeout = 60
 
+# get power range per phase
+if "DEFAULT" in config and "power_threshold_per_phase" in config["DEFAULT"]:
+    power_threshold_per_phase = int(config["DEFAULT"]["power_threshold_per_phase"])
+else:
+    power_threshold_per_phase = 230 * 100  # 230 V * 100 A
+
 
 # set variables
 connected = 0
@@ -156,7 +162,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     try:
-        global last_changed, grid_power, grid_current, grid_voltage, grid_forward, grid_reverse
+        global last_changed, power_threshold_per_phase, grid_power, grid_current, grid_voltage, grid_forward, grid_reverse
         global grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_frequency, grid_L1_forward, grid_L1_reverse
         global grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_frequency, grid_L2_forward, grid_L2_reverse
         global grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_frequency, grid_L3_forward, grid_L3_reverse
@@ -171,6 +177,11 @@ def on_message(client, userdata, msg):
                 if "grid" in jsonpayload:
                     if isinstance(jsonpayload["grid"], dict):
                         if "power" in jsonpayload["grid"]:
+                            # check if power is within the allowed range
+                            if abs(jsonpayload["grid"]["power"]) > power_threshold_per_phase * 3:
+                                logging.error(f"power is out of range: {jsonpayload['grid']['power']}. Allowed range is -{power_threshold_per_phase * 3} to {power_threshold_per_phase * 3}")
+                                logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                return
                             grid_power = float(jsonpayload["grid"]["power"])
                             grid_voltage = float(jsonpayload["grid"]["voltage"]) if "voltage" in jsonpayload["grid"] else float(config["DEFAULT"]["voltage"])
                             grid_current = float(jsonpayload["grid"]["current"]) if "current" in jsonpayload["grid"] else (grid_power / grid_voltage if grid_voltage != 0 else 0)
@@ -179,6 +190,11 @@ def on_message(client, userdata, msg):
 
                             # check if L1 and L1 -> power exists
                             if "L1" in jsonpayload["grid"] and "power" in jsonpayload["grid"]["L1"]:
+                                # check if power is within the allowed range
+                                if abs(jsonpayload["grid"]["L1"]["power"]) > power_threshold_per_phase:
+                                    logging.error(f"power_L1 is out of range: {jsonpayload['grid']['L1']['power']}. Allowed range is -{power_threshold_per_phase} to {power_threshold_per_phase}")
+                                    logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                    return
                                 grid_L1_power = float(jsonpayload["grid"]["L1"]["power"])
                                 grid_L1_voltage = float(jsonpayload["grid"]["L1"]["voltage"]) if "voltage" in jsonpayload["grid"]["L1"] else float(config["DEFAULT"]["voltage"])
                                 grid_L1_current = float(jsonpayload["grid"]["L1"]["current"]) if "current" in jsonpayload["grid"]["L1"] else (grid_L1_power / grid_L1_voltage if grid_L1_voltage != 0 else 0)
@@ -188,6 +204,11 @@ def on_message(client, userdata, msg):
 
                             # check if L2 and L2 -> power exists
                             if "L2" in jsonpayload["grid"] and "power" in jsonpayload["grid"]["L2"]:
+                                # check if power is within the allowed range
+                                if abs(jsonpayload["grid"]["L2"]["power"]) > power_threshold_per_phase:
+                                    logging.error(f"power_L2 is out of range: {jsonpayload['grid']['L2']['power']}. Allowed range is -{power_threshold_per_phase} to {power_threshold_per_phase}")
+                                    logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                    return
                                 grid_L2_power = float(jsonpayload["grid"]["L2"]["power"])
                                 grid_L2_voltage = float(jsonpayload["grid"]["L2"]["voltage"]) if "voltage" in jsonpayload["grid"]["L2"] else float(config["DEFAULT"]["voltage"])
                                 grid_L2_current = float(jsonpayload["grid"]["L2"]["current"]) if "current" in jsonpayload["grid"]["L2"] else (grid_L2_power / grid_L2_voltage if grid_L2_voltage != 0 else 0)
@@ -197,6 +218,11 @@ def on_message(client, userdata, msg):
 
                             # check if L3 and L3 -> power exists
                             if "L3" in jsonpayload["grid"] and "power" in jsonpayload["grid"]["L3"]:
+                                # check if power is within the allowed range
+                                if abs(jsonpayload["grid"]["L3"]["power"]) > power_threshold_per_phase:
+                                    logging.error(f"power_L3 is out of range: {jsonpayload['grid']['L3']['power']}. Allowed range is -{power_threshold_per_phase} to {power_threshold_per_phase}")
+                                    logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                    return
                                 grid_L3_power = float(jsonpayload["grid"]["L3"]["power"])
                                 grid_L3_voltage = float(jsonpayload["grid"]["L3"]["voltage"]) if "voltage" in jsonpayload["grid"]["L3"] else float(config["DEFAULT"]["voltage"])
                                 grid_L3_current = float(jsonpayload["grid"]["L3"]["current"]) if "current" in jsonpayload["grid"]["L3"] else (grid_L3_power / grid_L3_voltage if grid_L3_voltage != 0 else 0)
@@ -207,6 +233,11 @@ def on_message(client, userdata, msg):
                         # the power and power_L1-3 values have to be sent within the same second or
                         # power as last one, else on startup the phases are not correctly recognized
                         elif "power_L1" in jsonpayload["grid"]:
+                            # check if power is within the allowed range
+                            if abs(jsonpayload["grid"]["power_L1"]) > power_threshold_per_phase:
+                                logging.error(f"power_L1 is out of range: {jsonpayload['grid']['power_L1']}. Allowed range is -{power_threshold_per_phase} to {power_threshold_per_phase}")
+                                logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                return
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
                             grid_L1_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
@@ -214,6 +245,11 @@ def on_message(client, userdata, msg):
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
+                            # check if power is within the allowed range
+                            if abs(jsonpayload["grid"]["power_L2"]) > power_threshold_per_phase:
+                                logging.error(f"power_L2 is out of range: {jsonpayload['grid']['power_L2']}. Allowed range is -{power_threshold_per_phase} to {power_threshold_per_phase}")
+                                logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                return
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
                             grid_L2_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
@@ -221,6 +257,11 @@ def on_message(client, userdata, msg):
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
+                            # check if power is within the allowed range
+                            if abs(jsonpayload["grid"]["power_L3"]) > power_threshold_per_phase:
+                                logging.error(f"power_L3 is out of range: {jsonpayload['grid']['power_L3']}. Allowed range is -{power_threshold_per_phase} to {power_threshold_per_phase}")
+                                logging.debug("MQTT payload: " + str(msg.payload)[1:])
+                                return
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
@@ -281,7 +322,7 @@ class DbusMqttGridService:
         self._dbusservice.add_path("/ProductId", 0xFFFF)
         self._dbusservice.add_path("/ProductName", productname)
         self._dbusservice.add_path("/CustomName", customname)
-        self._dbusservice.add_path("/FirmwareVersion", "0.1.6 (20240819)")
+        self._dbusservice.add_path("/FirmwareVersion", "0.1.7-dev (20241004)")
         # self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path("/Connected", 1)
 
