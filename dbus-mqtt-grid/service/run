@@ -1,4 +1,4 @@
 #!/bin/sh
 echo "*** starting dbus-mqtt-grid ***"
 exec 2>&1
-exec /data/etc/dbus-mqtt-grid/dbus-mqtt-grid.py
+exec python /data/etc/dbus-mqtt-grid/dbus-mqtt-grid.py

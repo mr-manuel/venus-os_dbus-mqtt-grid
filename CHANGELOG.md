@@ -4,6 +4,7 @@
 * Added: Device type `heatpump`
 * Added: Filter power values out of range
 * Changed: Broker port missing on reconnect
+* Changed: Fixed service not starting sometimes
 
 ## v0.1.6
 * Added: Set device type to `grid`, `genset` or `acload`
