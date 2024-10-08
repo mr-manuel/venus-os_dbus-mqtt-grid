@@ -1,8 +1,9 @@
 # Changelog
 
-## v0.1.x
+## v0.1.7-dev
 * Added: Device type `heatpump`
 * Added: Filter power values out of range
+* Changed: Broker port missing on reconnect
 
 ## v0.1.6
 * Added: Set device type to `grid`, `genset` or `acload`
