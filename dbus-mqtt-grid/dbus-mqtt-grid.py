@@ -282,8 +282,12 @@ def on_message(client, userdata, msg):
                 logging.warning("Received JSON MQTT message was empty and therefore it was ignored")
                 logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
+    except TypeError as e:
+        logging.error("Received message is not valid. Check the README and sample payload. %s" % e)
+        logging.debug("MQTT payload: " + str(msg.payload)[1:])
+
     except ValueError as e:
-        logging.error("Received message is not a valid JSON. %s" % e)
+        logging.error("Received message is not a valid JSON. Check the README and sample payload. %s" % e)
         logging.debug("MQTT payload: " + str(msg.payload)[1:])
 
     except Exception:
