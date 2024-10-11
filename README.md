@@ -2,7 +2,25 @@
 
 <small>GitHub repository: [mr-manuel/venus-os_dbus-mqtt-grid](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid)</small>
 
-### Disclaimer
+## Index
+
+1. [Disclaimer](#disclaimer)
+1. [Supporting/Sponsoring this project](#supportingsponsoring-this-project)
+1. [Purpose](#purpose)
+1. [Config](#config)
+1. [JSON structure](#json-structure)
+1. [Tasmota](#tasmota)
+1. [Home Assistant](#home-assistant)
+1. [Install](#install)
+1. [Uninstall](#uninstall)
+1. [Restart](#restart)
+1. [Debugging](#debugging)
+1. [Multiple instances](#multiple-instances)
+1. [Compatibility](#compatibility)
+1. [Screenshots](#screenshots)
+
+
+## Disclaimer
 
 I wrote this script for myself. I'm not responsible, if you damage something using my script.
 
@@ -14,18 +32,18 @@ You like the project and you want to support me?
 [<img src="https://github.md0.eu/uploads/donate-button.svg" height="50">](https://www.paypal.com/donate/?hosted_button_id=3NEVZBDM5KABW)
 
 
-### Purpose
+## Purpose
 
 The script emulates a physical Grid/Genset/AC Load Meter in Venus OS. It gets the MQTT data from a subscribed topic and publishes the information on the dbus as the service `com.victronenergy.grid.mqtt_grid`, `com.victronenergy.genset.mqtt_genset` or `com.victronenergy.acload.mqtt_acload` with the VRM instance `31`.
 
 It also supports the Tasmota-SmartMeter format.
 
 
-### Config
+## Config
 
 Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` folder and change it as you need it.
 
-### JSON structure
+## JSON structure
 
 <details><summary>Minimum required</summary>
 
@@ -128,9 +146,47 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 ```
 </details>
 
-Alternatively you can use the json structure produced by Tasmota-EnergyMeter (see section [tasmota](#Tasmota))
+Alternatively you can use the JSON structure produced by Tasmota-EnergyMeter (see section [Tasmota](#Tasmota))
 
-#### Tasmota
+
+## Home Assistant
+
+This is only a simple example that can be reduced expanded to match the minimum or full requirements shown above.
+
+```yml
+alias: mqtt publish sensor grid power
+description: ""
+trigger:
+  - platform: state
+    entity_id: sensor.YOUR_GRID_POWER_ENTITY
+condition: []
+action:
+  - service: mqtt.publish
+    data_template:
+      payload: |
+        {
+          "grid": {
+            "power": {{ (states('sensor.YOUR_GRID_POWER_ENTITY') | float(0)) }},
+            "L1": {
+                "power": {{ (states('sensor.YOUR_GRID_L1_POWER_ENTITY') | float(0)) }},
+            },
+            "L2": {
+                "power": {{ (states('sensor.YOUR_GRID_L2_POWER_ENTITY') | float(0)) }},
+            },
+            "L3": {
+                "power": {{ (states('sensor.YOUR_GRID_L3_POWER_ENTITY') | float(0)) }},
+            }
+          }
+        }
+      topic: homeassistant/energy/grid
+```
+
+In the `config.ini` of `dbus-mqtt-grid` set the MQTT broker to the Home Assistant hostname/IP and the topic to the same as in your Home Assistant config (like above).
+
+See also this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/10#issuecomment-1826763558).
+
+
+## Tasmota
 
 Setting up tasmota as Tasmota-SmartMeter is not part of this documentation. See https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics
 or https://homeitems.de/smartmeter-mit-tasmota-auslesen/# (German) for detailed information on how to set up Tasmota-EnergyMeter.
@@ -186,11 +242,8 @@ config.ini topic = SML/SENSOR
 
 Additional information can be found in this [issue](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/13#issue-2045377392).
 
-#### Home Assistant
 
-See this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/10#issuecomment-1826763558).
-
-### Install
+## Install
 
 1. Login to your Venus OS device via SSH. See [Venus OS:Root Access](https://www.victronenergy.com/live/ccgx:root_access#root_access) for more details.
 
@@ -236,15 +289,15 @@ See this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/1
 
    The daemon-tools should start this service automatically within seconds.
 
-### Uninstall
+## Uninstall
 
 Run `/data/etc/dbus-mqtt-grid/uninstall.sh`
 
-### Restart
+## Restart
 
 Run `/data/etc/dbus-mqtt-grid/restart.sh`
 
-### Debugging
+## Debugging
 
 The logs can be checked with `tail -n 100 -F /data/log/dbus-mqtt-grid/current | tai64nlocal`
 
@@ -256,7 +309,7 @@ If the seconds are under 5 then the service crashes and gets restarted all the t
 
 If the script stops with the message `dbus.exceptions.NameExistsException: Bus name already exists: com.victronenergy.grid.mqtt_grid"` it means that the service is still running or another service is using that bus name.
 
-### Multiple instances
+## Multiple instances
 
 It's possible to have multiple instances, but it's not automated. Follow these steps to achieve this:
 
@@ -276,14 +329,14 @@ It's possible to have multiple instances, but it's not automated. Follow these s
 
 Now you can install and run the cloned driver. Should you need another instance just increase the number in step 1 and repeat all steps.
 
-### Compatibility
+## Compatibility
 
 It was tested on Venus OS Large `v2.92` on the following devices:
 
 * RaspberryPi 4b
 * MultiPlus II (GX Version)
 
-### Screenshots
+## Screenshots
 
 <details><summary>Power and/or L1</summary>
 
