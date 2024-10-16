@@ -168,13 +168,13 @@ action:
           "grid": {
             "power": {{ (states('sensor.YOUR_GRID_POWER_ENTITY') | float(0)) }},
             "L1": {
-                "power": {{ (states('sensor.YOUR_GRID_L1_POWER_ENTITY') | float(0)) }},
+                "power": {{ (states('sensor.YOUR_GRID_L1_POWER_ENTITY') | float(0)) }}
             },
             "L2": {
-                "power": {{ (states('sensor.YOUR_GRID_L2_POWER_ENTITY') | float(0)) }},
+                "power": {{ (states('sensor.YOUR_GRID_L2_POWER_ENTITY') | float(0)) }}
             },
             "L3": {
-                "power": {{ (states('sensor.YOUR_GRID_L3_POWER_ENTITY') | float(0)) }},
+                "power": {{ (states('sensor.YOUR_GRID_L3_POWER_ENTITY') | float(0)) }}
             }
           }
         }
