@@ -2,11 +2,13 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SERVICE_NAME=$(basename $SCRIPT_DIR)
 
+echo
+echo "Installing $SERVICE_NAME..."
+
 # set permissions for script files
-chmod 744 $SCRIPT_DIR/$SERVICE_NAME.py
-chmod 744 $SCRIPT_DIR/install.sh
-chmod 744 $SCRIPT_DIR/restart.sh
-chmod 744 $SCRIPT_DIR/uninstall.sh
+echo "Setting permissions..."
+chmod 755 $SCRIPT_DIR/*.py
+chmod 755 $SCRIPT_DIR/*.sh
 chmod 755 $SCRIPT_DIR/service/run
 chmod 755 $SCRIPT_DIR/service/log/run
 
@@ -14,6 +16,7 @@ chmod 755 $SCRIPT_DIR/service/log/run
 python -c "import paho.mqtt.client"
 if [ $? -gt 0 ]
 then
+    echo "Installing paho.mqtt.client..."
     # install paho.mqtt.client
     python -m pip install paho-mqtt
     if [ $? -gt 0 ]
@@ -25,17 +28,24 @@ then
 fi
 
 # create sym-link to run script in deamon
-ln -s $SCRIPT_DIR/service /service/$SERVICE_NAME
+if [ ! -L /service/$SERVICE_NAME ]; then
+    echo "Creating service..."
+    ln -s $SCRIPT_DIR/service /service/$SERVICE_NAME
+else
+    echo "Service already exists."
+fi
 
 # add install-script to rc.local to be ready for firmware update
 filename=/data/rc.local
 if [ ! -f $filename ]
 then
     touch $filename
-    chmod 777 $filename
+    chmod 755 $filename
     echo "#!/bin/bash" >> $filename
     echo >> $filename
 fi
 
 # if not alreay added, then add to rc.local
 grep -qxF "bash $SCRIPT_DIR/install.sh" $filename || echo "bash $SCRIPT_DIR/install.sh" >> $filename
+
+echo

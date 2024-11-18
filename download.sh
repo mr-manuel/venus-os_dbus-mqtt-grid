@@ -131,7 +131,7 @@ if [ -n "$extracted_folder" ]; then
     fi
 else
     echo "Error: Could not find extracted folder. Exiting..."
-    # exit 1
+    exit 1
 fi
 
 
@@ -147,7 +147,7 @@ fi
 if [ -d ${driver_path}/${driver_name_instance} ]; then
     echo ""
     echo "Cleaning up existing driver..."
-    rm -rf ${driver_path}/${driver_name_instance}
+    rm -rf ${driver_path:?}/${driver_name_instance}
 fi
 
 
@@ -221,7 +221,7 @@ if [ ! -f ${driver_path}/${driver_name_instance}/config.ini ]; then
     echo ""
 else
     echo ""
-    echo "Restaring driver to apply new version..."
+    echo "Restart driver to apply new version..."
     /bin/bash ${driver_path}/${driver_name_instance}/restart.sh
 fi
 

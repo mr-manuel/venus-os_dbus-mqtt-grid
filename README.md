@@ -323,6 +323,16 @@ Additional information can be found in this [issue](https://github.com/mr-manuel
 
 ⚠️ If you have multiple instances, ensure you choose the correct one.
 
+- To check the logs of the default instance:
+    ```bash
+    tail -n 100 -F /data/log/dbus-mqtt-grid/current | tai64nlocal
+    ```
+
+- To check the logs of the second instance:
+    ```bash
+    tail -n 100 -F /data/log/dbus-mqtt-grid-2/current | tai64nlocal
+    ```
+
 The service status can be checked with svstat `svstat /service/dbus-mqtt-grid`
 
 This will output somethink like `/service/dbus-mqtt-grid: up (pid 5845) 185 seconds`
