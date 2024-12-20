@@ -3,6 +3,7 @@
 ## v0.1.7-dev
 * Added: Device type `heatpump`
 * Added: Filter power values out of range
+* Added: Power factor
 * Changed: Broker port missing on reconnect
 * Changed: Default device instance is now `100`
 * Changed: Fixed service not starting sometimes

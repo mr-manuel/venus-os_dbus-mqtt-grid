@@ -111,6 +111,7 @@ grid_L1_power = None
 grid_L1_current = None
 grid_L1_voltage = None
 grid_L1_frequency = None
+grid_L1_power_factor = None
 grid_L1_forward = None
 grid_L1_reverse = None
 
@@ -118,6 +119,7 @@ grid_L2_power = None
 grid_L2_current = None
 grid_L2_voltage = None
 grid_L2_frequency = None
+grid_L2_power_factor = None
 grid_L2_forward = None
 grid_L2_reverse = None
 
@@ -125,6 +127,7 @@ grid_L3_power = None
 grid_L3_current = None
 grid_L3_voltage = None
 grid_L3_frequency = None
+grid_L3_power_factor = None
 grid_L3_forward = None
 grid_L3_reverse = None
 
@@ -163,9 +166,9 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         global last_changed, power_threshold_per_phase, grid_power, grid_current, grid_voltage, grid_forward, grid_reverse
-        global grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_frequency, grid_L1_forward, grid_L1_reverse
-        global grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_frequency, grid_L2_forward, grid_L2_reverse
-        global grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_frequency, grid_L3_forward, grid_L3_reverse
+        global grid_L1_power, grid_L1_current, grid_L1_voltage, grid_L1_frequency, grid_L1_power_factor, grid_L1_forward, grid_L1_reverse
+        global grid_L2_power, grid_L2_current, grid_L2_voltage, grid_L2_frequency, grid_L2_power_factor, grid_L2_forward, grid_L2_reverse
+        global grid_L3_power, grid_L3_current, grid_L3_voltage, grid_L3_frequency, grid_L3_power_factor, grid_L3_forward, grid_L3_reverse
 
         # get JSON from topic
         if msg.topic == config["MQTT"]["topic"]:
@@ -199,6 +202,7 @@ def on_message(client, userdata, msg):
                                 grid_L1_voltage = float(jsonpayload["grid"]["L1"]["voltage"]) if "voltage" in jsonpayload["grid"]["L1"] else float(config["DEFAULT"]["voltage"])
                                 grid_L1_current = float(jsonpayload["grid"]["L1"]["current"]) if "current" in jsonpayload["grid"]["L1"] else (grid_L1_power / grid_L1_voltage if grid_L1_voltage != 0 else 0)
                                 grid_L1_frequency = float(jsonpayload["grid"]["L1"]["frequency"]) if "frequency" in jsonpayload["grid"]["L1"] else None
+                                grid_L1_power_factor = float(jsonpayload["grid"]["L1"]["power_factor"]) if "power_factor" in jsonpayload["grid"]["L1"] else None
                                 grid_L1_forward = float(jsonpayload["grid"]["L1"]["energy_forward"]) if "energy_forward" in jsonpayload["grid"]["L1"] else 0
                                 grid_L1_reverse = float(jsonpayload["grid"]["L1"]["energy_reverse"]) if "energy_reverse" in jsonpayload["grid"]["L1"] else 0
 
@@ -213,6 +217,7 @@ def on_message(client, userdata, msg):
                                 grid_L2_voltage = float(jsonpayload["grid"]["L2"]["voltage"]) if "voltage" in jsonpayload["grid"]["L2"] else float(config["DEFAULT"]["voltage"])
                                 grid_L2_current = float(jsonpayload["grid"]["L2"]["current"]) if "current" in jsonpayload["grid"]["L2"] else (grid_L2_power / grid_L2_voltage if grid_L2_voltage != 0 else 0)
                                 grid_L2_frequency = float(jsonpayload["grid"]["L2"]["frequency"]) if "frequency" in jsonpayload["grid"]["L2"] else None
+                                grid_L2_power_factor = float(jsonpayload["grid"]["L2"]["power_factor"]) if "power_factor" in jsonpayload["grid"]["L2"] else None
                                 grid_L2_forward = float(jsonpayload["grid"]["L2"]["energy_forward"]) if "energy_forward" in jsonpayload["grid"]["L2"] else 0
                                 grid_L2_reverse = float(jsonpayload["grid"]["L2"]["energy_reverse"]) if "energy_reverse" in jsonpayload["grid"]["L2"] else 0
 
@@ -227,6 +232,7 @@ def on_message(client, userdata, msg):
                                 grid_L3_voltage = float(jsonpayload["grid"]["L3"]["voltage"]) if "voltage" in jsonpayload["grid"]["L3"] else float(config["DEFAULT"]["voltage"])
                                 grid_L3_current = float(jsonpayload["grid"]["L3"]["current"]) if "current" in jsonpayload["grid"]["L3"] else (grid_L3_power / grid_L3_voltage if grid_L3_voltage != 0 else 0)
                                 grid_L3_frequency = float(jsonpayload["grid"]["L3"]["frequency"]) if "frequency" in jsonpayload["grid"]["L3"] else None
+                                grid_L3_power_factor = float(jsonpayload["grid"]["L3"]["power_factor"]) if "power_factor" in jsonpayload["grid"]["L3"] else None
                                 grid_L3_forward = float(jsonpayload["grid"]["L3"]["energy_forward"]) if "energy_forward" in jsonpayload["grid"]["L3"] else 0
                                 grid_L3_reverse = float(jsonpayload["grid"]["L3"]["energy_reverse"]) if "energy_reverse" in jsonpayload["grid"]["L3"] else 0
                         # for Tasmota support
@@ -241,7 +247,7 @@ def on_message(client, userdata, msg):
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
                             grid_L1_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
-                            grid_L1_frequency = None
+                            grid_L1_frequency = float(config["DEFAULT"]["frequency"])
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
@@ -253,7 +259,7 @@ def on_message(client, userdata, msg):
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
                             grid_L2_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
-                            grid_L2_frequency = None
+                            grid_L2_frequency = float(config["DEFAULT"]["frequency"])
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
@@ -265,7 +271,7 @@ def on_message(client, userdata, msg):
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
-                            grid_L3_frequency = None
+                            grid_L3_frequency = float(config["DEFAULT"]["frequency"])
                             grid_L3_forward = 0
                             grid_L3_reverse = 0
                         else:
@@ -367,6 +373,7 @@ class DbusMqttGridService:
                     self._dbusservice["/Ac/L1/Current"] = round(grid_L1_current, 2) if grid_L1_current is not None else None
                     self._dbusservice["/Ac/L1/Voltage"] = round(grid_L1_voltage, 2) if grid_L1_voltage is not None else None
                     self._dbusservice["/Ac/L1/Frequency"] = round(grid_L1_frequency, 2) if grid_L1_frequency is not None else None
+                    self._dbusservice["/ac/L1/PowerFactor"] = round(grid_L1_power_factor, 3) if grid_L1_power_factor is not None else None
                     self._dbusservice["/Ac/L1/Energy/Forward"] = round(grid_L1_forward, 2) if grid_L1_forward is not None else None
                     self._dbusservice["/Ac/L1/Energy/Reverse"] = round(grid_L1_reverse, 2) if grid_L1_reverse is not None else None
                 else:
@@ -382,6 +389,7 @@ class DbusMqttGridService:
                     self._dbusservice["/Ac/L2/Current"] = round(grid_L2_current, 2) if grid_L2_current is not None else None
                     self._dbusservice["/Ac/L2/Voltage"] = round(grid_L2_voltage, 2) if grid_L2_voltage is not None else None
                     self._dbusservice["/Ac/L2/Frequency"] = round(grid_L2_frequency, 2) if grid_L2_frequency is not None else None
+                    self._dbusservice["/ac/L2/PowerFactor"] = round(grid_L2_power_factor, 3) if grid_L2_power_factor is not None else None
                     self._dbusservice["/Ac/L2/Energy/Forward"] = round(grid_L2_forward, 2) if grid_L2_forward is not None else None
                     self._dbusservice["/Ac/L2/Energy/Reverse"] = round(grid_L2_reverse, 2) if grid_L2_reverse is not None else None
 
@@ -390,6 +398,7 @@ class DbusMqttGridService:
                     self._dbusservice["/Ac/L3/Current"] = round(grid_L3_current, 2) if grid_L3_current is not None else None
                     self._dbusservice["/Ac/L3/Voltage"] = round(grid_L3_voltage, 2) if grid_L3_voltage is not None else None
                     self._dbusservice["/Ac/L3/Frequency"] = round(grid_L3_frequency, 2) if grid_L3_frequency is not None else None
+                    self._dbusservice["/ac/L3/PowerFactor"] = round(grid_L3_power_factor, 3) if grid_L3_power_factor is not None else None
                     self._dbusservice["/Ac/L3/Energy/Forward"] = round(grid_L3_forward, 2) if grid_L3_forward is not None else None
                     self._dbusservice["/Ac/L3/Energy/Reverse"] = round(grid_L3_reverse, 2) if grid_L3_reverse is not None else None
 
@@ -530,6 +539,7 @@ def main():
         "/Ac/L1/Current": {"initial": 0, "textformat": _a},
         "/Ac/L1/Voltage": {"initial": 0, "textformat": _v},
         "/Ac/L1/Frequency": {"initial": None, "textformat": _hz},
+        "/ac/L1/PowerFactor": {"initial": None, "textformat": _n},
         "/Ac/L1/Energy/Forward": {"initial": None, "textformat": _kwh},
         "/Ac/L1/Energy/Reverse": {"initial": None, "textformat": _kwh},
         "/UpdateIndex": {"initial": 0, "textformat": _n},
@@ -542,6 +552,7 @@ def main():
                 "/Ac/L2/Current": {"initial": 0, "textformat": _a},
                 "/Ac/L2/Voltage": {"initial": 0, "textformat": _v},
                 "/Ac/L2/Frequency": {"initial": None, "textformat": _hz},
+                "/ac/L2/PowerFactor": {"initial": None, "textformat": _n},
                 "/Ac/L2/Energy/Forward": {"initial": None, "textformat": _kwh},
                 "/Ac/L2/Energy/Reverse": {"initial": None, "textformat": _kwh},
             }
@@ -554,6 +565,7 @@ def main():
                 "/Ac/L3/Current": {"initial": 0, "textformat": _a},
                 "/Ac/L3/Voltage": {"initial": 0, "textformat": _v},
                 "/Ac/L3/Frequency": {"initial": None, "textformat": _hz},
+                "/ac/L3/PowerFactor": {"initial": None, "textformat": _n},
                 "/Ac/L3/Energy/Forward": {"initial": None, "textformat": _kwh},
                 "/Ac/L3/Energy/Reverse": {"initial": None, "textformat": _kwh},
             }
