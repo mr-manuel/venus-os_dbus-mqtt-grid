@@ -9,8 +9,10 @@
 1. [Purpose](#purpose)
 1. [Config](#config)
 1. [JSON structure](#json-structure)
-1. [Tasmota](#tasmota)
-1. [Home Assistant](#home-assistant)
+    - [Generic device](#generic-device)
+    - [Home Assistant](#home-assistant)
+    - [Shelly Gen2+](#shelly-gen-2)
+    - [Tasmota](#tasmota)
 1. [Install / Update](#install--update)
 1. [Uninstall](#uninstall)
 1. [Restart](#restart)
@@ -43,6 +45,8 @@ It also supports the Tasmota-SmartMeter format.
 Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` folder and change it as you need it.
 
 ## JSON structure
+
+### Generic device
 
 <details><summary>Minimum required</summary>
 
@@ -151,7 +155,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 Alternatively you can use the JSON structure produced by Tasmota-EnergyMeter (see section [Tasmota](#Tasmota))
 
 
-## Home Assistant
+### Home Assistant
 
 This is only a simple example that can be reduced expanded to match the minimum or full requirements shown above.
 
@@ -188,7 +192,28 @@ In the `config.ini` of `dbus-mqtt-grid` set the MQTT broker to the Home Assistan
 See also this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/10#issuecomment-1826763558).
 
 
-## Tasmota
+### Shelly (Gen 2+)
+
+```json
+ {
+    "apower": 0.0,
+    "voltage": 0.0,
+    "freq": 0,
+    "current": 0.000,
+    "pf": 0,
+    "aenergy": {
+        "total": 0.000
+    },
+    "ret_aenergy": {
+        "total": 0.000
+    }
+}
+```
+
+Ensure your Shelly device uses the same topic as configured in `config.ini`. Enable MQTT on your Shelly device and set the host, port, and topic correctly.
+
+
+### Tasmota
 
 Setting up tasmota as Tasmota-SmartMeter is not part of this documentation. See https://tasmota.github.io/docs/Smart-Meter-Interface/#meter-metrics
 or https://homeitems.de/smartmeter-mit-tasmota-auslesen/# (German) for detailed information on how to set up Tasmota-EnergyMeter.
