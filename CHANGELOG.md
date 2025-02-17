@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.8-dev
+* Changed: Fix restart issue
+
 ## v0.1.7
 ⚠️ This version is required for Venus OS v3.60~27 or later, but it is also compatible with older versions.
 * Added: Device type `heatpump`
