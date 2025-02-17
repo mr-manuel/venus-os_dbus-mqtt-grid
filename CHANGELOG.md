@@ -1,8 +1,10 @@
 # Changelog
 
-## v0.1.7-dev
+## v0.1.7
+⚠️ This version is required for Venus OS v3.60~27 or later, but it is also compatible with older versions.
 * Added: Device type `heatpump`
 * Added: Filter power values out of range
+* Added: paho-mqtt module to driver
 * Added: Power factor
 * Added: Shelly Gen2+ device support
 * Changed: Broker port missing on reconnect

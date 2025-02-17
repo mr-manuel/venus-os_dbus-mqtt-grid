@@ -7,9 +7,12 @@ import sys
 import os
 from time import sleep, time
 import json
-import paho.mqtt.client as mqtt
 import configparser  # for config/ini file
 import _thread
+
+# import external packages
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), "ext"))
+import paho.mqtt.client as mqtt
 
 # import Victron Energy packages
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), "ext", "velib_python"))
@@ -133,13 +136,13 @@ grid_L3_reverse = None
 
 
 # MQTT requests
-def on_disconnect(client, userdata, rc):
+def on_disconnect(client, userdata, flags, reason_code, properties):
     global connected
     logging.warning("MQTT client: Got disconnected")
-    if rc != 0:
+    if reason_code != 0:
         logging.warning("MQTT client: Unexpected MQTT disconnection. Will auto-reconnect")
     else:
-        logging.warning("MQTT client: rc value:" + str(rc))
+        logging.warning("MQTT client: reason_code value:" + str(reason_code))
 
     while connected == 0:
         try:
@@ -153,14 +156,14 @@ def on_disconnect(client, userdata, rc):
             sleep(15)
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, reason_code, properties):
     global connected
-    if rc == 0:
+    if reason_code == 0:
         logging.info("MQTT client: Connected to MQTT broker!")
         connected = 1
         client.subscribe(config["MQTT"]["topic"])
     else:
-        logging.error("MQTT client: Failed to connect, return code %d\n", rc)
+        logging.error("MQTT client: Failed to connect, return code %d\n", reason_code)
 
 
 def on_message(client, userdata, msg):
@@ -332,7 +335,7 @@ class DbusMqttGridService:
         self._dbusservice.add_path("/ProductId", 0xFFFF)
         self._dbusservice.add_path("/ProductName", productname)
         self._dbusservice.add_path("/CustomName", customname)
-        self._dbusservice.add_path("/FirmwareVersion", "0.1.7-dev (20241220)")
+        self._dbusservice.add_path("/FirmwareVersion", "0.1.7 (20250217)")
         # self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path("/Connected", 1)
 
@@ -459,7 +462,7 @@ def main():
     DBusGMainLoop(set_as_default=True)
 
     # MQTT setup
-    client = mqtt.Client("MqttGrid_" + get_vrm_portal_id() + "_" + str(config["DEFAULT"]["device_instance"]))
+    client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id="MqttGrid_" + get_vrm_portal_id() + "_" + str(config["DEFAULT"]["device_instance"]))
     client.on_disconnect = on_disconnect
     client.on_connect = on_connect
     client.on_message = on_message
