@@ -250,7 +250,7 @@ def on_message(client, userdata, msg):
                             grid_L1_power = float(jsonpayload["grid"]["power_L1"])
                             grid_L1_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L1_current = grid_L1_power / float(config["DEFAULT"]["voltage"])
-                            grid_L1_frequency = float(config["DEFAULT"]["frequency"])
+                            grid_L1_frequency = float(config["DEFAULT"].get("frequency", None))
                             grid_L1_forward = 0
                             grid_L1_reverse = 0
                         elif "power_L2" in jsonpayload["grid"]:
@@ -262,7 +262,7 @@ def on_message(client, userdata, msg):
                             grid_L2_power = float(jsonpayload["grid"]["power_L2"])
                             grid_L2_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L2_current = grid_L2_power / float(config["DEFAULT"]["voltage"])
-                            grid_L2_frequency = float(config["DEFAULT"]["frequency"])
+                            grid_L2_frequency = float(config["DEFAULT"].get("frequency", None))
                             grid_L2_forward = 0
                             grid_L2_reverse = 0
                         elif "power_L3" in jsonpayload["grid"]:
@@ -274,7 +274,7 @@ def on_message(client, userdata, msg):
                             grid_L3_power = float(jsonpayload["grid"]["power_L3"])
                             grid_L3_voltage = float(config["DEFAULT"]["voltage"])
                             grid_L3_current = grid_L3_power / float(config["DEFAULT"]["voltage"])
-                            grid_L3_frequency = float(config["DEFAULT"]["frequency"])
+                            grid_L3_frequency = float(config["DEFAULT"].get("frequency", None))
                             grid_L3_forward = 0
                             grid_L3_reverse = 0
                         else:
@@ -335,7 +335,7 @@ class DbusMqttGridService:
         self._dbusservice.add_path("/ProductId", 0xFFFF)
         self._dbusservice.add_path("/ProductName", productname)
         self._dbusservice.add_path("/CustomName", customname)
-        self._dbusservice.add_path("/FirmwareVersion", "0.1.8-dev (20250217)")
+        self._dbusservice.add_path("/FirmwareVersion", "0.1.8-dev (20250307)")
         # self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path("/Connected", 1)
 

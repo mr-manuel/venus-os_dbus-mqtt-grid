@@ -1,6 +1,7 @@
 # Changelog
 
 ## v0.1.8-dev
+* Changed: Fix missing frequency in config file https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/38
 * Changed: Fix restart issue
 
 ## v0.1.7
