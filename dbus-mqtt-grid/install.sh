@@ -12,21 +12,6 @@ chmod 755 $SCRIPT_DIR/*.sh
 chmod 755 $SCRIPT_DIR/service/run
 chmod 755 $SCRIPT_DIR/service/log/run
 
-# check dependencies
-python -c "import paho.mqtt.client"
-if [ $? -gt 0 ]
-then
-    echo "Installing paho.mqtt.client..."
-    # install paho.mqtt.client
-    python -m pip install paho-mqtt
-    if [ $? -gt 0 ]
-    then
-        # if pip command fails install pip and then try again
-        opkg update && opkg install python3-pip
-        python -m pip install paho-mqtt
-    fi
-fi
-
 # create sym-link to run script in deamon
 if [ ! -L /service/$SERVICE_NAME ]; then
     echo "Creating service..."
