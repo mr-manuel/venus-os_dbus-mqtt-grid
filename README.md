@@ -53,7 +53,7 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 ```json
 {
     "grid": {
-        "power": 0.0
+        "power": 0.0                 <-- watts
     }
 }
 ```
@@ -64,9 +64,9 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 ```json
 {
     "grid": {
-        "power": 0.0,
+        "power": 0.0,                <-- watts
         "L1": {
-            "power": 0.0
+            "power": 0.0             <-- watts
         }
     }
 }
@@ -78,12 +78,12 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 ```json
 {
     "grid": {
-        "power": 0.0,
+        "power": 0.0,                <-- watts
         "L1": {
-            "power": 0.0
+            "power": 0.0             <-- watts
         },
         "L2": {
-            "power": 0.0
+            "power": 0.0             <-- watts
         }
     }
 }
@@ -95,15 +95,15 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 ```json
 {
     "grid": {
-        "power": 0.0,
+        "power": 0.0,                <-- watts
         "L1": {
-            "power": 0.0
+            "power": 0.0             <-- watts
         },
         "L2": {
-            "power": 0.0
+            "power": 0.0             <-- watts
         },
         "L3": {
-            "power": 0.0
+            "power": 0.0             <-- watts
         }
     }
 }
@@ -115,37 +115,37 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 ```json
 {
     "grid": {
-        "power": 0.0,
-        "voltage": 0.0,
-        "current": 0.0,
-        "energy_forward": 0.0,
-        "energy_reverse": 0.0,
+        "power": 0.0,                <-- watts
+        "voltage": 0.0,              <-- volts
+        "current": 0.0,              <-- amps
+        "energy_forward": 0.0,       <-- imported/bought energy (lifetime), positive value in kWh
+        "energy_reverse": 0.0,       <-- exported/sold energy (lifetime), positive value in kWh
         "L1": {
-            "power": 0.0,
-            "voltage": 0.0,
-            "current": 0.0,
-            "frequency": 0.0000,
+            "power": 0.0,            <-- watts
+            "voltage": 0.0,          <-- volts
+            "current": 0.0,          <-- amps
+            "frequency": 0.0000,     <-- Hz
             "power_factor": 0.0,
-            "energy_forward": 0.0,
-            "energy_reverse": 0.0
+            "energy_forward": 0.0,   <-- imported/bought energy (lifetime), positive value in kWh
+            "energy_reverse": 0.0    <-- exported/sold energy (lifetime), positive value in kWh
         },
         "L2": {
-            "power": 0.0,
-            "voltage": 0.0,
-            "current": 0.0,
-            "frequency": 0.0000,
+            "power": 0.0,            <-- watts
+            "voltage": 0.0,          <-- volts
+            "current": 0.0,          <-- amps
+            "frequency": 0.0000,     <-- Hz
             "power_factor": 0.0,
-            "energy_forward": 0.0,
-            "energy_reverse": 0.0
+            "energy_forward": 0.0,   <-- imported/bought energy (lifetime), positive value in kWh
+            "energy_reverse": 0.0    <-- exported/sold energy (lifetime), positive value in kWh
         },
         "L3": {
-            "power": 0.0,
-            "voltage": 0.0,
-            "current": 0.0,
-            "frequency": 0.0000,
+            "power": 0.0,            <-- watts
+            "voltage": 0.0,          <-- volts
+            "current": 0.0,          <-- amps
+            "frequency": 0.0000,     <-- Hz
             "power_factor": 0.0,
-            "energy_forward": 0.0,
-            "energy_reverse": 0.0
+            "energy_forward": 0.0,   <-- imported/bought energy (lifetime), positive value in kWh
+            "energy_reverse": 0.0    <-- exported/sold energy (lifetime), positive value in kWh
         }
     }
 }
