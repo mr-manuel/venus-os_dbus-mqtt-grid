@@ -335,7 +335,7 @@ class DbusMqttGridService:
         self._dbusservice.add_path("/ProductId", 0xFFFF)
         self._dbusservice.add_path("/ProductName", productname)
         self._dbusservice.add_path("/CustomName", customname)
-        self._dbusservice.add_path("/FirmwareVersion", "0.1.8-dev (20250307)")
+        self._dbusservice.add_path("/FirmwareVersion", "0.1.8 (20250331)")
         # self._dbusservice.add_path('/HardwareVersion', '')
         self._dbusservice.add_path("/Connected", 1)
 
@@ -376,7 +376,7 @@ class DbusMqttGridService:
                     self._dbusservice["/Ac/L1/Current"] = round(grid_L1_current, 2) if grid_L1_current is not None else None
                     self._dbusservice["/Ac/L1/Voltage"] = round(grid_L1_voltage, 2) if grid_L1_voltage is not None else None
                     self._dbusservice["/Ac/L1/Frequency"] = round(grid_L1_frequency, 2) if grid_L1_frequency is not None else None
-                    self._dbusservice["/ac/L1/PowerFactor"] = round(grid_L1_power_factor, 3) if grid_L1_power_factor is not None else None
+                    self._dbusservice["/Ac/L1/PowerFactor"] = round(grid_L1_power_factor, 3) if grid_L1_power_factor is not None else None
                     self._dbusservice["/Ac/L1/Energy/Forward"] = round(grid_L1_forward, 2) if grid_L1_forward is not None else None
                     self._dbusservice["/Ac/L1/Energy/Reverse"] = round(grid_L1_reverse, 2) if grid_L1_reverse is not None else None
                 else:
@@ -392,7 +392,7 @@ class DbusMqttGridService:
                     self._dbusservice["/Ac/L2/Current"] = round(grid_L2_current, 2) if grid_L2_current is not None else None
                     self._dbusservice["/Ac/L2/Voltage"] = round(grid_L2_voltage, 2) if grid_L2_voltage is not None else None
                     self._dbusservice["/Ac/L2/Frequency"] = round(grid_L2_frequency, 2) if grid_L2_frequency is not None else None
-                    self._dbusservice["/ac/L2/PowerFactor"] = round(grid_L2_power_factor, 3) if grid_L2_power_factor is not None else None
+                    self._dbusservice["/Ac/L2/PowerFactor"] = round(grid_L2_power_factor, 3) if grid_L2_power_factor is not None else None
                     self._dbusservice["/Ac/L2/Energy/Forward"] = round(grid_L2_forward, 2) if grid_L2_forward is not None else None
                     self._dbusservice["/Ac/L2/Energy/Reverse"] = round(grid_L2_reverse, 2) if grid_L2_reverse is not None else None
 
@@ -401,7 +401,7 @@ class DbusMqttGridService:
                     self._dbusservice["/Ac/L3/Current"] = round(grid_L3_current, 2) if grid_L3_current is not None else None
                     self._dbusservice["/Ac/L3/Voltage"] = round(grid_L3_voltage, 2) if grid_L3_voltage is not None else None
                     self._dbusservice["/Ac/L3/Frequency"] = round(grid_L3_frequency, 2) if grid_L3_frequency is not None else None
-                    self._dbusservice["/ac/L3/PowerFactor"] = round(grid_L3_power_factor, 3) if grid_L3_power_factor is not None else None
+                    self._dbusservice["/Ac/L3/PowerFactor"] = round(grid_L3_power_factor, 3) if grid_L3_power_factor is not None else None
                     self._dbusservice["/Ac/L3/Energy/Forward"] = round(grid_L3_forward, 2) if grid_L3_forward is not None else None
                     self._dbusservice["/Ac/L3/Energy/Reverse"] = round(grid_L3_reverse, 2) if grid_L3_reverse is not None else None
 
@@ -542,7 +542,7 @@ def main():
         "/Ac/L1/Current": {"initial": 0, "textformat": _a},
         "/Ac/L1/Voltage": {"initial": 0, "textformat": _v},
         "/Ac/L1/Frequency": {"initial": None, "textformat": _hz},
-        "/ac/L1/PowerFactor": {"initial": None, "textformat": _n},
+        "/Ac/L1/PowerFactor": {"initial": None, "textformat": _n},
         "/Ac/L1/Energy/Forward": {"initial": None, "textformat": _kwh},
         "/Ac/L1/Energy/Reverse": {"initial": None, "textformat": _kwh},
         "/UpdateIndex": {"initial": 0, "textformat": _n},
@@ -555,7 +555,7 @@ def main():
                 "/Ac/L2/Current": {"initial": 0, "textformat": _a},
                 "/Ac/L2/Voltage": {"initial": 0, "textformat": _v},
                 "/Ac/L2/Frequency": {"initial": None, "textformat": _hz},
-                "/ac/L2/PowerFactor": {"initial": None, "textformat": _n},
+                "/Ac/L2/PowerFactor": {"initial": None, "textformat": _n},
                 "/Ac/L2/Energy/Forward": {"initial": None, "textformat": _kwh},
                 "/Ac/L2/Energy/Reverse": {"initial": None, "textformat": _kwh},
             }
@@ -568,7 +568,7 @@ def main():
                 "/Ac/L3/Current": {"initial": 0, "textformat": _a},
                 "/Ac/L3/Voltage": {"initial": 0, "textformat": _v},
                 "/Ac/L3/Frequency": {"initial": None, "textformat": _hz},
-                "/ac/L3/PowerFactor": {"initial": None, "textformat": _n},
+                "/Ac/L3/PowerFactor": {"initial": None, "textformat": _n},
                 "/Ac/L3/Energy/Forward": {"initial": None, "textformat": _kwh},
                 "/Ac/L3/Energy/Reverse": {"initial": None, "textformat": _kwh},
             }
