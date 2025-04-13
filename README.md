@@ -11,6 +11,7 @@
 1. [JSON structure](#json-structure)
     - [Generic device](#generic-device)
     - [Home Assistant](#home-assistant)
+    - [ESPHome](#esphome)
     - [Shelly Gen2+](#shelly-gen-2)
     - [Tasmota](#tasmota)
 1. [Install / Update](#install--update)
