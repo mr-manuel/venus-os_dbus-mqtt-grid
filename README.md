@@ -193,9 +193,9 @@ See also this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/iss
 
 ### ESPHome
 
-If you have working setup with any esphome-p1reader fork e.g. [here](https://github.com/mp314/esphome-p1reader), you can add direct connection to Victorn MQTT server and bypass the HA instance.
+If you have working setup with esphome-p1reader e.g. [here](https://github.com/mp314/esphome-p1reader), you can add direct connection to Victor MQTT server and bypass the HA run time dependency.
 
-Just add mqtt-broker, `id` -field to every sensor, and mqtt.publish_json to last sensor value (in my case "Cumulative Active Import", CRC ok event would be more correct place). See example below. 
+Just add mqtt-broker, id-field to every sensor, and mqtt.publish_json to last updated sensor value (in this case "Cumulative Active Import", CRC ok event would be more correct place). See example below. 
 
 ```yml
 mqtt:
@@ -234,6 +234,8 @@ sensor:
       # id added
       id: E_out
 ```
+
+Note: This example sends all mqtt messages to Victron server, so there is some extra traffic.
 
 ### Shelly (Gen 2+)
 
