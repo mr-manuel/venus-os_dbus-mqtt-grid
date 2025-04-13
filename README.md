@@ -191,6 +191,49 @@ In the `config.ini` of `dbus-mqtt-grid` set the MQTT broker to the Home Assistan
 
 See also this [comment](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/10#issuecomment-1826763558).
 
+### ESPHome
+
+If you have working setup with any esphome-p1reader fork e.g. [here](https://github.com/mp314/esphome-p1reader), you can add direct connection to Victorn MQTT server and bypass the HA instance.
+
+Just add mqtt-broker, `id` -field to every sensor, and mqtt.publish_json to last sensor value (in my case "Cumulative Active Import", CRC ok event would be more correct place). See example below. 
+
+```yml
+mqtt:
+  broker: !secret victron_mqtt
+
+sensor:
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    cumulative_active_import:
+      name: "Cumulative Active Import"
+      # id added
+      id: E_in
+      # on value update publish json. Uses id's are reference to other sensors.
+      on_value:
+        then:
+          - mqtt.publish_json:
+              topic: "han/p1reader"
+              payload: |-
+                root["grid"]["power"] = (id(P_in).state-id(P_out).state) * 1000;
+                root["grid"]["energy_forward"] = id(E_in).state;
+                root["grid"]["energy_reverse"] = id(E_out).state;
+                root["grid"]["L1"]["power"] = (id(P1_in).state-id(P1_out).state) * 1000;
+                root["grid"]["L2"]["power"] = (id(P2_in).state-id(P2_out).state) * 1000;
+                root["grid"]["L3"]["power"] = (id(P3_in).state-id(P3_out).state) * 1000;
+                root["grid"]["L1"]["voltage"] = id(U1).state;
+                root["grid"]["L2"]["voltage"] = id(U2).state;
+                root["grid"]["L3"]["voltage"] = id(U3).state;
+                root["grid"]["L1"]["current"] = id(I1).state;
+                root["grid"]["L2"]["current"] = id(I1).state;
+                root["grid"]["L3"]["current"] = id(I3).state;
+
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    cumulative_active_export:
+      name: "Cumulative Active Export"
+      # id added
+      id: E_out
+```
 
 ### Shelly (Gen 2+)
 
