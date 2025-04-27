@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.9-dev
+* Changed: Fixes sporadic error on startup with power factor https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/40
+
 ## v0.1.8
 * Changed: Fix missing frequency in config file https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/38
 * Changed: Fix restart issue
