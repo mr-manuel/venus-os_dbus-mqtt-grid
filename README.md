@@ -10,6 +10,7 @@
 1. [Config](#config)
 1. [JSON structure](#json-structure)
     - [Generic device](#generic-device)
+    - [ESPHome](#esphome)
     - [Home Assistant](#home-assistant)
     - [Shelly Gen2+](#shelly-gen-2)
     - [Tasmota](#tasmota)
@@ -153,6 +154,296 @@ Copy or rename the `config.sample.ini` to `config.ini` in the `dbus-mqtt-grid` f
 </details>
 
 Alternatively you can use the JSON structure produced by Tasmota-EnergyMeter (see section [Tasmota](#Tasmota))
+
+
+### ESPHome
+
+With this ESPHome-code, you can directly send the grid-usage to the GX device, to configure zero feed-in, without the need to modify the payload.
+
+See also [esphome configuration to directly send from MBus-Grid-Smartmeter to Victron](https://github.com/mr-manuel/venus-os_dbus-mqtt-grid/issues/41).
+
+<details><summary>ESPHome config</summary>
+
+```yml
+esphome:
+  name: "smartmeter"
+  area: Keller
+
+esp8266:
+  board: nodemcuv2
+logger:        #level: DEBUG #INFO   #  level: DEBUG #WARN #DEBUG NONE
+  level: WARN
+  baud_rate: 0
+  esp8266_store_log_strings_in_flash: false
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  reboot_timeout: 5min
+  fast_connect: true
+
+external_components:
+  - source: github://pr#8009   # see https://github.com/esphome/esphome/pull/8009
+    components: [ dlms_meter ]
+
+web_server:
+  port: 80
+  version: 2
+
+mqtt:
+  broker: x.local #ip to venusos
+  id: mqtt_broker
+  discovery: false
+  enable_on_boot: false
+
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: ""
+  reboot_timeout: 5 min
+
+ota:
+  - platform: esphome
+    password: ""
+
+
+uart:
+  tx_pin: RX
+  rx_pin: TX
+  baud_rate: 2400
+  rx_buffer_size: 1024 # Needed to receive the large packets send by the smart meter
+  id: mbus
+
+dlms_meter:
+  decryption_key: "kexFromEVN"
+
+
+binary_sensor:
+  - platform: template
+    name: "L1 Overcurrent Alarm"
+    lambda: |-
+      if (id(meter01_current_l1).state > 25) {
+        return true;
+      } else {
+        return false;
+      }
+  - platform: template
+    name: "L2 Overcurrent Alarm"
+    lambda: |-
+      if (id(meter01_current_l2).state > 25) {
+        return true;
+      } else {
+        return false;
+      }
+  - platform: template
+    name: "L3 Overcurrent Alarm"
+    lambda: |-
+      if (id(meter01_current_l3).state > 25) {
+        return true;
+      } else {
+        return false;
+      }
+
+sensor:
+
+  - platform: dlms_meter
+    voltage_l1:
+      name: "smartmeter_voltage_l1"
+      id: meter01_voltage_l1
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+    voltage_l2:
+      name: "smartmeter_voltage_l2"
+      id: meter01_voltage_l2
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+    voltage_l3:
+      name: "smartmeter_voltage_l3"
+      id: meter01_voltage_l3
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+    current_l1:
+      name: "smartmeter_current_l1"
+      id: meter01_current_l1
+      device_class: "current"
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+    current_l2:
+      name: "smartmeter_current_l2"
+      id: meter01_current_l2
+      device_class: "current"
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+    current_l3:
+      name: "smartmeter_current_l3"
+      id: meter01_current_l3
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+
+    active_power_plus:
+      name: "smartmeter_active_power_plus"
+      id: active_power_plus
+      # filters:
+      # - filter_out:
+      #     - 0
+      on_value:
+        then:
+          - lambda: |-
+              id(smartmeter_active_power).publish_state(id(active_power_plus).state-0);
+
+    active_power_minus:
+      name: "smartmeter_active_power_minus"
+      id: active_power_minus
+      on_value:
+        then:
+          - lambda: |-
+              if (id(active_power_minus).state != 0) {
+                id(smartmeter_active_power).publish_state(0 - id(active_power_minus).state);
+              }
+    active_energy_plus:
+      name: "smartmeter_active_energy_plus"
+      id: active_energy_plus
+    active_energy_minus:
+      name: "smartmeter_active_energy_minus"
+      id: active_energy_minus
+    reactive_energy_plus:
+      name: "smartmeter_reactive_energy_plus"
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+    reactive_energy_minus:
+      name: "smartmeter_reactive_energy_minus"
+      disabled_by_default: true
+      entity_category: diagnostic
+      filters:
+        - or:
+          - throttle: 10s
+          - delta: 2.0
+
+    # # EVN
+    # power_factor:
+    #   name: "Power Factor"
+
+  - platform: template
+    id: smartmeter_active_power
+    name: meter01_active_power
+    unit_of_measurement: W
+    accuracy_decimals: 0
+    device_class: "power"
+    state_class: "measurement"
+    update_interval: never
+    on_value:
+          - if:
+              condition:
+                switch.is_on: switch_on_off
+              then:
+                - mqtt.publish_json:
+                    topic: "external/nodered/shrdzm-to-victron/grid"
+                    payload: |-
+                      root["grid"]["power"]          = (float)id(smartmeter_active_power).state;
+                      root["grid"]["voltage"]        = (float)id(meter01_voltage_l1).state;
+                      root["grid"]["energy_forward"] = (float)id(smartmeter_zaehlerstand_bezug).state*0.001;
+                      root["grid"]["energy_reverse"] = (float)id(smartmeter_zaehlerstand_einspeisung).state*0.001;
+                      root["grid"]["L1"]["voltage"] = (float)id(meter01_voltage_l1).state;
+                      root["grid"]["L2"]["voltage"] = (float)id(meter01_voltage_l2).state;
+                      root["grid"]["L3"]["voltage"] = (float)id(meter01_voltage_l3).state;
+                      root["grid"]["L1"]["power"]   = (float)id(meter01_voltage_l1).state*id(meter01_current_l1).state;
+                      root["grid"]["L2"]["power"]   = (float)id(meter01_voltage_l2).state*id(meter01_current_l2).state;
+                      root["grid"]["L3"]["power"]   = (float)id(meter01_voltage_l3).state*id(meter01_current_l3).state;
+                      root["grid"]["L1"]["current"] = (float)id(meter01_current_l1).state;
+                      root["grid"]["L2"]["current"] = (float)id(meter01_current_l2).state;
+                      root["grid"]["L3"]["current"] = (float)id(meter01_current_l3).state;
+
+
+  - platform: template
+    id: smartmeter_zaehlerstand_bezug
+    name: smartmeter_zaehlerstand_bezug
+    unit_of_measurement: kWh
+    accuracy_decimals: 0
+    device_class: "energy"
+    state_class: "total_increasing"
+    update_interval: 120s
+    lambda: |-
+         return id(active_energy_plus).state;
+    filters:
+     - multiply: 0.001
+
+  - platform: template
+    id: smartmeter_zaehlerstand_einspeisung
+    name: smartmeter_zaehlerstand_einspeisung
+    unit_of_measurement: kWh
+    accuracy_decimals: 0
+    device_class: "energy"
+    state_class: "total_increasing"
+    update_interval: 120s
+    lambda: |-
+         return id(active_energy_minus).state;
+    filters:
+     - multiply: 0.001
+
+
+switch:
+  - platform: template
+    name: Nutze Smartmeter direkt in Victron
+    id: switch_on_off
+    restore_mode: RESTORE_DEFAULT_OFF
+    # lambda: |-
+    #   if (id(switch_on_off).state) {
+    #     return true;
+    #   } else {
+    #     return false;
+    #   }
+    optimistic: true
+    turn_on_action:
+      - mqtt.enable:
+    #   - delay: 500ms
+    #   - switch.turn_on: switch_on_off
+    turn_off_action:
+      - mqtt.publish_json:
+          topic: "external/nodered/shrdzm-to-victron/grid"
+          payload: |-
+            root["grid"] = "";
+      - mqtt.disable:
+
+text_sensor:
+  - platform: dlms_meter
+    timestamp:
+      name: "smartmeter_timestamp"
+      disabled_by_default: true
+    # # EVN
+    # meternumber:
+    #   name: "meterNumber"
+```
+</details>
 
 
 ### Home Assistant
